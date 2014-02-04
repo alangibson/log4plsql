@@ -19,19 +19,20 @@
  * distribution in the LICENSE.txt file.  
  * see: <http://log4plsql.sourceforge.net>  */
 
- 
- 
 create or replace  view VLOG as 
-select '['||to_char(LDATE, 'Mon DD, HH24:MI:SS')||':'||LTRIM(to_char(mod(LHSECS,100),'09'))||']'||
-       '['||plogparam.getLevelInText(llevel)||']['||
-       LUSER||']['||
-       LSECTION||']['||
-       LTEXT||']' log
-from (select * from (select * from tlog order by id desc) where rownum < 25) 
+select
+    PLOG.formatMessage(pID         => ID,
+                        pLDATE      => LDATE,
+                        pLHSECS     => LHSECS,
+                        pLLEVEL     => LLEVEL,
+                        pLSECTION   => LSECTION,
+                        pLUSER      => LUSER,
+                        pLTEXT      => LTEXT,
+                        pLINSTANCE  => LINSTANCE 
+                        ) log
+from tlog 
 order by ID
 /
-
-
 
 
 -------------------------------------------------------------------
