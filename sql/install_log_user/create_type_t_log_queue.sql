@@ -22,10 +22,11 @@
 
 create or replace TYPE T_LOG_QUEUE AS OBJECT(
 lID        NUMBER, 
-lDate      DATE,
+lDate      TIMESTAMP,
 lHSecs     NUMBER,
 lLevel     NUMBER,
 lSection   VARCHAR(2000),
 lUser      VARCHAR(30),
-lText      VARCHAR(2000));
+lText      VARCHAR(2000),
+lInstance  NUMBER);
 /

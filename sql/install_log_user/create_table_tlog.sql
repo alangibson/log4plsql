@@ -18,18 +18,22 @@
  * distribution in the LICENSE.txt file.  
  * see: <http://log4plsql.sourceforge.net>  */
 
+-- drop table tlog;
+
 CREATE TABLE TLOG
 (
-  ID       NUMBER, 
-  LDATE    DATE DEFAULT SYSDATE, 
-  LHSECS   NUMBER(38), 
-  LLEVEL   NUMBER(38), 
-  LSECTION VARCHAR2(2000 BYTE), 
-  LTEXT    VARCHAR2(2000 BYTE), 
-  LUSER    VARCHAR2(30 BYTE), 
+  ID            NUMBER, 
+  LDATE         TIMESTAMP DEFAULT SYSTIMESTAMP, 
+  LHSECS        NUMBER(38), 
+  LLEVEL        NUMBER(38), 
+  LSECTION      VARCHAR2(2000 BYTE), 
+  LTEXT         VARCHAR2(4000 BYTE), 
+  LUSER         VARCHAR2(30 BYTE), 
+  LINSTANCE     NUMBER(38) DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
+  LXML          SYS.XMLTYPE DEFAULT NULL,
   CONSTRAINT   PK_STG PRIMARY KEY (ID));
 
+COMMENT ON COLUMN TLOG.LINSTANCE IS 'The instance identification number of the current instance';
 
-
-
+COMMENT ON COLUMN TLOG.LXML IS 'XML data. Primarily for logging webservice calls.';
 

@@ -14,19 +14,21 @@ PACKAGE PLOG_INTERFACE AS
 --*******************************************************************************
   PROCEDURE log
 (
-    pCTX        IN OUT NOCOPY      PLOGPARAM.LOG_CTX                ,  
+    pCTX        IN OUT NOCOPY      PLOGPARAM.LOG_CTX       ,  
     pID         IN       TLOG.id%TYPE                      ,
     pLDate      IN       TLOG.ldate%TYPE                   ,
     pLHSECS     IN       TLOG.lhsecs%TYPE                  ,
     pLLEVEL     IN       TLOG.llevel%TYPE                  ,
     pLSECTION   IN       TLOG.lsection%TYPE                ,
     pLUSER      IN       TLOG.luser%TYPE                   ,
-    pLTEXT      IN       TLOG.LTEXT%TYPE
+    pLTEXT      IN       TLOG.LTEXT%TYPE                   ,
+    pLINSTANCE  IN       TLOG.LINSTANCE%TYPE DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
+    pLXML        IN       SYS.XMLTYPE DEFAULT NULL
 );
 
   PROCEDURE purge
 (
-   pMaxDate IN DATE DEFAULT NULL 
+   pMaxDate IN TIMESTAMP DEFAULT NULL 
 );
 
 END;

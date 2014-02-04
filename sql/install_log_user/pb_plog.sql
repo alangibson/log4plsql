@@ -23,7 +23,6 @@ PACKAGE BODY              PLOG IS
  * see: <http://log4plsql.sourceforge.net>  */
 -------------------------------------------------------------------
 
-
 -- private variables
 LOG4PLSQL_VERSION  VARCHAR2(200) := '4.0';
 
@@ -31,42 +30,77 @@ LOG4PLSQL_VERSION  VARCHAR2(200) := '4.0';
 AE_LEVEL_NOT_EXIST CONSTANT NUMBER  := -20100;
 AE_OUTPUT_NOT_INSTALLED CONSTANT NUMBER  := -20200;
 
-FUNCTION isPackageInstalled(pPackageName IN VARCHAR2) RETURN  BOOLEAN;
+--******************************************************************************
+--
+--   getLOG4PLSQVersion
+--
+--   Public. Returns the current version number as string
+--
+--******************************************************************************
+FUNCTION getLOG4PLSQVersion RETURN VARCHAR2
+IS
+BEGIN
+    RETURN LOG4PLSQL_VERSION;
+END getLOG4PLSQVersion;
 
+--******************************************************************************
+--
+--  isPackageInstalled
+--
+--  PARAMETERS:
+--
+--      pPackageName           Package to verify if it is installed
+--
+--   Private. Returns TRUE if the package is installed, if not FALSE.
+--
+--******************************************************************************
+FUNCTION isPackageInstalled
+(
+    pPackageName IN VARCHAR2
+)
+RETURN  BOOLEAN
+IS
+    vObjectName USER_OBJECTS.OBJECT_NAME%TYPE;
+BEGIN
+    
+    SELECT OBJECT_NAME INTO vObjectName
+    FROM USER_OBJECTS
+    WHERE OBJECT_NAME = pPackageName 
+          AND OBJECT_TYPE = 'PACKAGE BODY';
 
-FUNCTION getNextID RETURN TLOG.ID%type
+    RETURN TRUE;
+    
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+       RETURN FALSE;
+END isPackageInstalled;
+
 --******************************************************************************
 --   NAME:   getNextID
 --
 --   Private. Returns the next value of the sequence SQ_STG
 --
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
+FUNCTION getNextID RETURN TLOG.ID%type
 IS
     temp NUMBER;
 BEGIN
-     SELECT SQ_STG.nextval INTO temp
+     SELECT SQ_STG.nextval 
+     INTO temp
      FROM dual;
 
      RETURN temp;
 
 END getNextID;
 
-
-
-
-FUNCTION getCallStack RETURN VARCHAR2 IS
 --******************************************************************************
 --   NAME:   getCallStack
 --
 --   Private. Returns the formated call stack
 --
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
+FUNCTION getCallStack RETURN VARCHAR2 
+IS
     endOfLine   CONSTANT    CHAR(1) := chr(10);
     endOfField  CONSTANT    CHAR(1) := chr(32);
     nbrLine     NUMBER;
@@ -108,18 +142,14 @@ BEGIN
 
 END getCallStack;
 
-
-
+--******************************************************************************
+-- FUNCTION getDefaultContext
+--
+--   Private. Returns the default context. Basically just calls init() with
+--   current section.
+--
+--******************************************************************************
 FUNCTION getDefaultContext
---******************************************************************************
---   NAME:   getDefaultContext
---
---   Private. Returns the default context
---
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
---******************************************************************************
 RETURN PLOGPARAM.LOG_CTX
 IS
     newCTX      PLOGPARAM.LOG_CTX;
@@ -131,26 +161,19 @@ BEGIN
     RETURN newCTX;
 END getDefaultContext;
 
-
-
-PROCEDURE     checkAndInitCTX
-(
-    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX
-)
 --******************************************************************************
---   NAME:   checkAndInitCTX
---
---  PARAMETERS:
+-- PROCEDURE checkAndInitCTX:
 --
 --      pCTX               log context
 --
 --   Private. Initializes the context parameter with a section equal to
 --   the call stack if it is not initialized.
 --
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
+PROCEDURE checkAndInitCTX
+(
+    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX
+)
 IS
     lSECTION    TLOG.LSECTION%TYPE;
 BEGIN
@@ -160,122 +183,104 @@ BEGIN
     END IF;
 END;
 
-
-
-
-
-PROCEDURE log
+--******************************************************************************
+-- FUNCTION jsonEscape:
+--
+--      message           LOGMESSAGE to serialize to JSON dictionary string
+--
+--******************************************************************************
+function jsonEscape
 (
-    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX                      ,
-    pID         IN       TLOG.id%TYPE                      ,
-    pLDate      IN       TLOG.ldate%TYPE                   ,
-    pLHSECS     IN       TLOG.lhsecs%TYPE                  ,
-    pLLEVEL     IN       TLOG.llevel%TYPE                  ,
-    pLSECTION   IN       TLOG.lsection%TYPE                ,
-    pLUSER      IN       TLOG.luser%TYPE                   ,
-    pLTEXT      IN       TLOG.LTEXT%TYPE
+    pString in TLOG.LTEXT%TYPE
 )
+return TLOG.LTEXT%TYPE
+is
+    buffer TLOG.LTEXT%TYPE;
+begin
+    buffer := pString;
+    buffer := replace(buffer, '\', '\u005C');
+    buffer := replace(buffer, chr(10), '\u000D'); -- %x72 / ; r carriage return U+000D
+    buffer := replace(buffer, chr(13), '\u000A'); -- %x6E / ; n line feed       U+000A
+    buffer := replace(buffer, '"', '\u0022');
+    buffer := replace(buffer, '/', '\u002F');
+    buffer := replace(buffer, '    ', '\u0009');
+    return buffer;
+end;
+
 --******************************************************************************
---   NAME:   log
+-- FUNCTION logmessageToJsonDict
 --
---   PARAMETERS:
+--      message           LOGMESSAGE to serialize to JSON dictionary string
 --
---      pCTX               log context
---      pID                ID of the log message, generated by the sequence
---      pLDate             Date of the log message (SYSDATE)
---      pLHSECS            Number of seconds since the beginning of the epoch
---      pLLEVEL            Log level as numeric value
---      pLSection          formated call stack
---      pLUSER             database user (SYSUSER)
---      pLTEXT             log text
---
---   Private. Main procedure for logging an event. If the log text is empty, it is
---   automatically filled by the Oracle error code and message. This procedure uses the
---   procedure PLOG_INTERFACE.log() which dispatches the log event to several
---   outputs.
---
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
-IS
-    LLTEXT TLOG.LTEXT%TYPE;
-BEGIN
-
-    IF pCTX.isDefaultInit = FALSE THEN
-        error('Context not initialized. Please use PLOG_MAIN.init to initialize it.');
-    END IF;
-
-    IF PLTEXT IS NULL THEN
-        LLTEXT := 'SQLCODE:'||SQLCODE ||' SQLERRM:'||SQLERRM;
-    ELSE
-        BEGIN
-            LLTEXT := pLTEXT;
-        EXCEPTION
-            WHEN VALUE_ERROR THEN
-                ASSERT (pCTX, length(pLTEXT) <= 2000, 'Log Message id:'||pID||' too long. ');
-                LLTEXT := substr(pLTEXT, 0, 2000);
-            WHEN OTHERS THEN
-                fatal;
-        END;
-
-    END IF;
-
-    -- raise exceptions if an output parameter is active but the corespondent package not installed
-    IF pCtx.USE_LOG4J THEN
-      IF isPackageInstalled('PLOG_OUT_AQ') = FALSE THEN
-        RAISE_APPLICATION_ERROR(AE_OUTPUT_NOT_INSTALLED, 'Parameter USE_LOG4J is TRUE but no advanced queue output (package PLOG_OUT_AQ) is installed');
-      END IF;
-    END IF;
-
-    IF pCtx.USE_ALERT THEN
-      IF isPackageInstalled('PLOG_OUT_ALERT') = FALSE THEN
-        RAISE_APPLICATION_ERROR(AE_OUTPUT_NOT_INSTALLED, 'Parameter USE_ALERT is TRUE but no alert output (package PLOG_OUT_ALERT) is installed');
-      END IF;
-    END IF;
-
-    IF pCtx.USE_TRACE THEN
-      IF isPackageInstalled('PLOG_OUT_TRACE') = FALSE THEN
-        RAISE_APPLICATION_ERROR(AE_OUTPUT_NOT_INSTALLED, 'Parameter USE_TRACE is TRUE but no trace output (package PLOG_OUT_TRACE) is installed');
-      END IF;
-    END IF;
-
-    IF pCtx.USE_DBMS_OUTPUT THEN
-      IF isPackageInstalled('PLOG_OUT_DBMS_OUTPUT') = FALSE THEN
-        RAISE_APPLICATION_ERROR(AE_OUTPUT_NOT_INSTALLED, 'Parameter USE_DBMS_OUTPUT is TRUE but no DBMS output (package PLOG_OUT_DBMS_OUTPUT) is installed');
-      END IF;
-    END IF;
-
-    IF pCtx.USE_SESSION THEN
-      IF isPackageInstalled('PLOG_OUT_SESSION') = FALSE THEN
-        RAISE_APPLICATION_ERROR(AE_OUTPUT_NOT_INSTALLED, 'Parameter USE_SESSION is TRUE but no session output (package PLOG_OUT_SESSION) is installed');
-      END IF;
-    END IF;
-
-    -- use the interface package to dispatch the log message in several outputs
-    PLOG_INTERFACE.log(pCTX, pID, pLDate, pLHSECS, pLLEVEL, pLSECTION, pLUSER, LLTEXT);
-
-END log;
-
-
-
-FUNCTION init
+function logmessageToJsonDict
 (
-    pSECTION        IN TLOG.LSECTION%TYPE DEFAULT NULL ,
-    pLEVEL          IN TLOG.LLEVEL%TYPE DEFAULT PLOGPARAM.DEFAULT_LEVEL,
-    pLOG4J          IN BOOLEAN            DEFAULT PLOGPARAM.DEFAULT_USE_LOG4J,
-    pLOGTABLE       IN BOOLEAN            DEFAULT PLOGPARAM.DEFAULT_LOG_TABLE,
-    pOUT_TRANS      IN BOOLEAN            DEFAULT PLOGPARAM.DEFAULT_LOG_OUT_TRANS,
-    pALERT          IN BOOLEAN            DEFAULT PLOGPARAM.DEFAULT_LOG_ALERT,
-    pTRACE          IN BOOLEAN            DEFAULT PLOGPARAM.DEFAULT_LOG_TRACE,
-    pDBMS_OUTPUT    IN BOOLEAN            DEFAULT PLOGPARAM.DEFAULT_DBMS_OUTPUT,
-    pSESSION        IN BOOLEAN            DEFAULT PLOGPARAM.DEFAULT_SESSION,
-    pDBMS_OUTPUT_WRAP IN PLS_INTEGER      DEFAULT PLOGPARAM.DEFAULT_DBMS_OUTPUT_LINE_WRAP
+    message in LOGMESSAGE
 )
+return TLOG.LTEXT%TYPE
+is
+    buffer TLOG.LTEXT%TYPE;
+begin
+    buffer := '{';
+    for i in message.FIRST .. message.LAST loop
+        if mod(i, 2) != 0 then
+            buffer := buffer || '"' || message(i) || '"' ||  ':';
+        else
+            buffer := buffer || case message(i) when NULL then 'null' else '"' || jsonEscape(message(i)) || '"' end;
+            -- Look ahead to eliminate trailing comma
+            if i < message.LAST then
+                buffer := buffer || ',';
+            end if;
+            
+        end if; 
+    end loop;
+    buffer := buffer || '}';
+    return buffer;
+end logmessageToJsonDict;
+
 --******************************************************************************
---   NAME:   init
+--  FUNCTION formatMessage   
 --
---   PARAMETERS:
+--  Public. String formatting function      
+--
+--******************************************************************************
+function formatMessage
+(
+    pFORMAT     IN       TLOG.LTEXT%TYPE DEFAULT PLOGPARAM.DEFAULT_FORMAT       ,
+    pDATEFORMAT IN       TLOG.LTEXT%TYPE DEFAULT PLOGPARAM.DEFAULT_DATE_FORMAT  ,
+    pSEPSTART   IN       VARCHAR2 DEFAULT PLOGPARAM.DEFAULT_FORMAT_SEP_START    ,
+    pSEPEND     IN       VARCHAR2 DEFAULT PLOGPARAM.DEFAULT_FORMAT_SEP_END      ,
+    pID         IN       TLOG.id%TYPE                                           ,
+    pLDATE      IN       TLOG.ldate%TYPE                                        ,
+    pLHSECS     IN       TLOG.lhsecs%TYPE                                       ,
+    pLLEVEL     IN       TLOG.llevel%TYPE                                       ,
+    pLSECTION   IN       TLOG.lsection%TYPE                                     ,
+    pLUSER      IN       TLOG.luser%TYPE                                        ,
+    pLTEXT      IN       TLOG.LTEXT%TYPE                                        ,
+    pLINSTANCE  IN       TLOG.LINSTANCE%TYPE DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
+    pLXML       IN       SYS.XMLTYPE DEFAULT NULL
+)
+return VARCHAR2
+
+is
+    buffer VARCHAR2(4000);
+begin
+    buffer := pFORMAT;
+    buffer := replace(buffer, '%(id)', pID );
+    buffer := replace(buffer, '%(date)', to_char(pLDATE, pDATEFORMAT ) );
+    buffer := replace(buffer, '%(hsecs)', LTRIM(to_char(mod(pLHSECS,100),'09')) );
+    buffer := replace(buffer, '%(level)', PLOGPARAM.getLevelInText(pLLEVEL) );
+    buffer := replace(buffer, '%(section)', pLSECTION );
+    buffer := replace(buffer, '%(user)', pLUSER );
+    buffer := replace(buffer, '%(text)', pLTEXT );
+    buffer := replace(buffer, '%(instance)', pLINSTANCE );
+    buffer := replace(buffer, '%(seps)', pSEPSTART);
+    buffer := replace(buffer, '%(sepe)', pSEPEND);
+    return buffer;
+end;
+
+--******************************************************************************
+-- FUNCTION init
 --
 --      pSECTION           log section
 --      pLEVEL             log level (Use only for debug)
@@ -293,10 +298,20 @@ FUNCTION init
 --   function to configure a special log context with parameter values different
 --   to the default ones (defined in the package PLOGPARAM)
 --
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
+FUNCTION init
+(
+    pSECTION        IN TLOG.LSECTION%TYPE DEFAULT NULL ,
+    pLEVEL          IN TLOG.LLEVEL%TYPE DEFAULT PLOGPARAM.DEFAULT_LEVEL,
+    pLOG4J          IN BOOLEAN            DEFAULT PLOGPARAM.DEFAULT_USE_LOG4J,
+    pLOGTABLE       IN BOOLEAN            DEFAULT PLOGPARAM.DEFAULT_LOG_TABLE,
+    pOUT_TRANS      IN BOOLEAN            DEFAULT PLOGPARAM.DEFAULT_LOG_OUT_TRANS,
+    pALERT          IN BOOLEAN            DEFAULT PLOGPARAM.DEFAULT_LOG_ALERT,
+    pTRACE          IN BOOLEAN            DEFAULT PLOGPARAM.DEFAULT_LOG_TRACE,
+    pDBMS_OUTPUT    IN BOOLEAN            DEFAULT PLOGPARAM.DEFAULT_DBMS_OUTPUT,
+    pSESSION        IN BOOLEAN            DEFAULT PLOGPARAM.DEFAULT_SESSION,
+    pDBMS_OUTPUT_WRAP IN PLS_INTEGER      DEFAULT PLOGPARAM.DEFAULT_DBMS_OUTPUT_LINE_WRAP
+)
 RETURN PLOGPARAM.LOG_CTX
 IS
     pCTX       PLOGPARAM.LOG_CTX;
@@ -320,16 +335,8 @@ BEGIN
 
 END init;
 
-
-PROCEDURE setBeginSection
-(
-    pCTX          IN OUT NOCOPY PLOGPARAM.LOG_CTX,
-    pSECTION      IN       TLOG.lsection%TYPE
-)
 --******************************************************************************
---   NAME:   setBeginSection
---
---  PARAMETERS:
+-- PROCEDURE setBeginSection
 --
 --      pCTX               log context
 --      pSection           Section node to add
@@ -341,6 +348,11 @@ PROCEDURE setBeginSection
 --   -----  ----------  ---------------   --------------------------------------
 --   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
+PROCEDURE setBeginSection
+(
+    pCTX          IN OUT NOCOPY PLOGPARAM.LOG_CTX,
+    pSECTION      IN       TLOG.lsection%TYPE
+)
 IS
 BEGIN
     checkAndInitCTX(pCTX);
@@ -348,28 +360,23 @@ BEGIN
 
 END setBeginSection;
 
-FUNCTION getSection
-(
-    pCTX        IN PLOGPARAM.LOG_CTX
-)
-RETURN TLOG.lsection%TYPE
 --******************************************************************************
 --   NAME:   getSection
 --
 --   Public. Returns the section of a specific log context
 --
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
+FUNCTION getSection
+(
+    pCTX        IN PLOGPARAM.LOG_CTX
+)
+RETURN TLOG.lsection%TYPE
 IS
 BEGIN
 
     RETURN pCTX.LSection;
 
 END getSection;
-
-
 
 FUNCTION getSection RETURN TLOG.lsection%TYPE
 --******************************************************************************
@@ -382,14 +389,11 @@ FUNCTION getSection RETURN TLOG.lsection%TYPE
 --   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
 IS
-    generiqueCTX PLOGPARAM.LOG_CTX := getDefaultContext;
 BEGIN
 
-    RETURN getSection(pCTX =>generiqueCTX);
+    RETURN getSection(pCTX =>getDefaultContext());
 
 END getSection;
-
-
 
 PROCEDURE setEndSection
 (
@@ -421,9 +425,7 @@ BEGIN
 
     pCTX.LSection := substr(pCTX.LSection,1,instr(UPPER(pCTX.LSection), UPPER(pSECTION), -1)-2);
 
-
 END setEndSection;
-
 
 PROCEDURE setTransactionMode
 (
@@ -451,7 +453,6 @@ BEGIN
     pCTX.USE_OUT_TRANS := pOutTransaction;
 
 END setTransactionMode;
-
 
 FUNCTION getTransactionMode
 (
@@ -481,8 +482,7 @@ BEGIN
 
 END getTransactionMode;
 
-FUNCTION getTransactionMode
-RETURN BOOLEAN
+FUNCTION getTransactionMode RETURN BOOLEAN
 --******************************************************************************
 --   NAME:   getTransactionMode
 --
@@ -496,14 +496,10 @@ RETURN BOOLEAN
 --   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
 IS
-        generiqueCTX PLOGPARAM.LOG_CTX := getDefaultContext;
+    generiqueCTX PLOGPARAM.LOG_CTX := getDefaultContext;
 BEGIN
     RETURN getTransactionMode(pCTX => generiqueCTX);
 END getTransactionMode;
-
-
-
-
 
 PROCEDURE setLOG_TABLEMode
 (
@@ -533,7 +529,6 @@ BEGIN
 
 END setLOG_TABLEMode;
 
-
 FUNCTION getLOG_TABLEMode
 (
     pCTX        IN PLOGPARAM.LOG_CTX
@@ -560,9 +555,7 @@ BEGIN
     RETURN pCTX.USE_LOGTABLE;
 END getLOG_TABLEMode;
 
-
-FUNCTION getLOG_TABLEMode
-RETURN BOOLEAN
+FUNCTION getLOG_TABLEMode RETURN BOOLEAN
 --******************************************************************************
 --   NAME:   getLOG_TABLEMode
 --
@@ -580,7 +573,6 @@ IS
 BEGIN
     RETURN getTransactionMode(pCTX => generiqueCTX);
 END getLOG_TABLEMode;
-
 
 PROCEDURE setDBMS_OUTPUTMode
 (
@@ -607,9 +599,8 @@ IS
 BEGIN
     checkAndInitCTX(pCTX);
     pCTX.USE_DBMS_OUTPUT := inDBMS_OUTPUT;
-    
+   
 END setDBMS_OUTPUTMode;
-
 
 FUNCTION getDBMS_OUTPUTMode 
 (
@@ -658,7 +649,6 @@ BEGIN
     RETURN getDBMS_OUTPUTMode(pCTX => generiqueCTX);
 END getDBMS_OUTPUTMode;
 
-
 PROCEDURE setUSE_LOG4JMode
 (
     pCTX IN OUT NOCOPY PLOGPARAM.LOG_CTX, 
@@ -686,7 +676,6 @@ BEGIN
     pCTX.USE_LOG4J := inUSE_LOG4J;
     
 END setUSE_LOG4JMode;
-
 
 FUNCTION getUSE_LOG4JMode 
 (
@@ -735,8 +724,6 @@ BEGIN
     RETURN getUSE_LOG4JMode(pCTX => generiqueCTX);
 END getUSE_LOG4JMode;
 
-
-
 PROCEDURE setLOG_AlertMode
 (
     pCTX IN OUT NOCOPY PLOGPARAM.LOG_CTX, 
@@ -764,7 +751,6 @@ BEGIN
     pCTX.USE_ALERT := inLOG_ALERT;
     
 END setLOG_AlertMode;
-
 
 FUNCTION getLOG_AlertMode 
 (
@@ -812,7 +798,6 @@ IS
 BEGIN
     RETURN getLOG_AlertMode(pCTX => generiqueCTX);
 END getLOG_AlertMode;
-
 
 PROCEDURE setLOG_TraceMode
 (
@@ -889,7 +874,6 @@ IS
 BEGIN
     RETURN getLOG_TraceMode(pCTX => generiqueCTX);
 END getLOG_TraceMode;
-
 
 PROCEDURE setLOG_SessionMode
 (
@@ -1010,8 +994,6 @@ EXCEPTION
         error;
 END setLevel;
 
-
-
 PROCEDURE setLevel
 --******************************************************************************
 --   NAME:   setLevel
@@ -1039,8 +1021,6 @@ BEGIN
     setLevel (pCTX, PLOGPARAM.getTextInLevel(pLEVEL));
 
 END setLevel;
-
-
 
 FUNCTION getLevel
 (
@@ -1084,8 +1064,6 @@ IS
 BEGIN
     RETURN getLevel( pCTX => generiqueCTX);
 END getLevel;
-
-
 
 FUNCTION isLevelEnabled
 (
@@ -1359,10 +1337,9 @@ BEGIN
   RETURN isLevelEnabled(pCTX, PLOGPARAM.getTextInLevel('DEBUG'));
 END isDebugEnabled;
 
-
 PROCEDURE purge
 (
-    pDateMax      IN DATE DEFAULT NULL
+    pDateMax      IN TIMESTAMP DEFAULT NULL
 )
 --******************************************************************************
 --   NAME:   purge
@@ -1395,17 +1372,144 @@ BEGIN
 
 END purge;
 
-
+--******************************************************************************
+-- PROCEDURE log
+--
+--      pCTX               log context
+--      pID                ID of the log message, generated by the sequence
+--      pLDate             Date of the log message (SYSTIMESTAMP)
+--      pLHSECS            Number of seconds since the beginning of the epoch
+--      pLLEVEL            Log level as numeric value
+--      pLSection          formated call stack
+--      pLUSER             database user (SYSUSER)
+--      pLTEXT             log text
+--      pLXML              XML data to archive
+--
+--   Private. Main procedure for logging an event. If the log text is empty, it is
+--   automatically filled by the Oracle error code and message. This procedure uses the
+--   procedure PLOG_INTERFACE.log() which dispatches the log event to several
+--   outputs.
+--
+--******************************************************************************
 PROCEDURE log
 (
-    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
-    pLEVEL      IN TLOG.LLEVEL%TYPE,
-    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
+    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX                      ,
+    pID         IN       TLOG.id%TYPE                      ,
+    pLDate      IN       TLOG.ldate%TYPE                   ,
+    pLHSECS     IN       TLOG.lhsecs%TYPE                  ,
+    pLLEVEL     IN       TLOG.llevel%TYPE                  ,
+    pLSECTION   IN       TLOG.lsection%TYPE                ,
+    pLUSER      IN       TLOG.luser%TYPE                   ,
+    pLTEXT      IN       TLOG.LTEXT%TYPE        DEFAULT NULL ,
+    pLINSTANCE  IN       TLOG.LINSTANCE%TYPE    DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
+    pLXML       IN       SYS.XMLTYPE            DEFAULT NULL
 )
+IS
+    LLTEXT TLOG.LTEXT%TYPE;
+BEGIN
+
+    IF pCTX.isDefaultInit = FALSE THEN
+        error('Context not initialized. Please use PLOG_MAIN.init to initialize it.');
+    END IF;
+
+    IF PLTEXT IS NULL THEN
+        LLTEXT := 'SQLCODE:'||SQLCODE ||' SQLERRM:'||SQLERRM;
+    ELSE
+        BEGIN
+            LLTEXT := pLTEXT;
+        EXCEPTION
+            WHEN VALUE_ERROR THEN
+                ASSERT (pCTX, length(pLTEXT) <= 2000, 'Log Message id:'||pID||' too long. ');
+                LLTEXT := substr(pLTEXT, 0, 2000);
+            WHEN OTHERS THEN
+                fatal;
+        END;
+
+    END IF;
+
+    -- raise exceptions if an output parameter is active but the corespondent package not installed
+    IF pCtx.USE_LOG4J THEN
+      IF isPackageInstalled('PLOG_OUT_AQ') = FALSE THEN
+        RAISE_APPLICATION_ERROR(AE_OUTPUT_NOT_INSTALLED, 'Parameter USE_LOG4J is TRUE but no advanced queue output (package PLOG_OUT_AQ) is installed');
+      END IF;
+    END IF;
+
+    IF pCtx.USE_ALERT THEN
+      IF isPackageInstalled('PLOG_OUT_ALERT') = FALSE THEN
+        RAISE_APPLICATION_ERROR(AE_OUTPUT_NOT_INSTALLED, 'Parameter USE_ALERT is TRUE but no alert output (package PLOG_OUT_ALERT) is installed');
+      END IF;
+    END IF;
+
+    IF pCtx.USE_TRACE THEN
+      IF isPackageInstalled('PLOG_OUT_TRACE') = FALSE THEN
+        RAISE_APPLICATION_ERROR(AE_OUTPUT_NOT_INSTALLED, 'Parameter USE_TRACE is TRUE but no trace output (package PLOG_OUT_TRACE) is installed');
+      END IF;
+    END IF;
+
+    IF pCtx.USE_DBMS_OUTPUT THEN
+      IF isPackageInstalled('PLOG_OUT_DBMS_OUTPUT') = FALSE THEN
+        RAISE_APPLICATION_ERROR(AE_OUTPUT_NOT_INSTALLED, 'Parameter USE_DBMS_OUTPUT is TRUE but no DBMS output (package PLOG_OUT_DBMS_OUTPUT) is installed');
+      END IF;
+    END IF;
+
+    IF pCtx.USE_SESSION THEN
+      IF isPackageInstalled('PLOG_OUT_SESSION') = FALSE THEN
+        RAISE_APPLICATION_ERROR(AE_OUTPUT_NOT_INSTALLED, 'Parameter USE_SESSION is TRUE but no session output (package PLOG_OUT_SESSION) is installed');
+      END IF;
+    END IF;
+
+    -- use the interface package to dispatch the log message in several outputs
+    PLOG_INTERFACE.log(pCTX, pID, pLDate, pLHSECS, pLLEVEL, pLSECTION, pLUSER, LLTEXT, pLINSTANCE, pLXML);
+
+END log;
+
 --******************************************************************************
---   NAME:   log
+-- PROCEDURE log
 --
---  PARAMETERS:
+--      pCTX               log context
+--      pID                ID of the log message, generated by the sequence
+--      pLDate             Date of the log message (SYSTIMESTAMP)
+--      pLHSECS            Number of seconds since the beginning of the epoch
+--      pLLEVEL            Log level as numeric value
+--      pLSection          formated call stack
+--      pLUSER             database user (SYSUSER)
+--      pLOGMESSAGE           LOGMESSAGE
+--
+--   Private. Main procedure for logging an event. Renders pLOGMESSAGE to JSON dict
+--   then calls main log().
+--
+--******************************************************************************
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX            ,
+    pID         IN       TLOG.id%TYPE                      ,
+    pLDate      IN       TLOG.ldate%TYPE                   ,
+    pLHSECS     IN       TLOG.lhsecs%TYPE                  ,
+    pLLEVEL     IN       TLOG.llevel%TYPE                  ,
+    pLSECTION   IN       TLOG.lsection%TYPE                ,
+    pLUSER      IN       TLOG.luser%TYPE                   ,
+    pLOGMESSAGE    IN       LOGMESSAGE                        ,
+    pLINSTANCE  IN       TLOG.LINSTANCE%TYPE               ,
+    pLXML       IN       SYS.XMLTYPE            DEFAULT NULL
+)
+IS
+BEGIN
+    -- Call main log function
+    log(
+        pCTX        => pCTX,
+        pID         => pID,
+        pLDate      => pLDate,
+        pLHSECS     => pLHSECS,
+        pLLEVEL     => pLLEVEL,
+        pLSECTION   => pLSECTION,
+        pLUSER      => pLUSER,
+        pLTEXT      => logmessageToJsonDict(pLOGMESSAGE),
+        pLINSTANCE  => pLINSTANCE,
+        pLXML       => pLXML );
+END;
+
+--******************************************************************************
+-- PROCEDURE log
 --
 --        pCTX             log context
 --        pLEVEL           log level as numeric value
@@ -1416,16 +1520,17 @@ PROCEDURE log
 --   The parameter pTEXT is the message text. If the parameter is NULL, the
 --   log text will be filled by the Oracle error code and message.
 --
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLEVEL      IN              TLOG.LLEVEL%TYPE,
+    pTEXT       IN              TLOG.LTEXT%TYPE,
+    pXML        IN              TLOG.LXML%TYPE
+)
 IS
-
-     lId        TLOG.ID%TYPE;
      lLSECTION  TLOG.LSECTION%TYPE := getSection(pCTX);
      lLHSECS    TLOG.LHSECS%TYPE;
-
 BEGIN
     checkAndInitCTX(pCTX);
 
@@ -1434,32 +1539,44 @@ BEGIN
         RETURN;
     END IF;
 
-    -- increment the log message ID
-    lId := getNextID;
-
     -- call the main log function
-    log (   pCTX        =>pCTX,
-            pID         =>lId,
-            pLDate      =>SYSDATE,
-            pLHSECS     =>DBMS_UTILITY.GET_TIME,
-            pLLEVEL     =>pLEVEL,
-            pLSECTION   =>lLSECTION,
-            pLUSER      =>USER,
-            pLTEXT      =>pTEXT
-        );
-
+    log(pCTX        => pCTX,
+        pID         => getNextID(), -- increment id
+        pLDate      => SYSTIMESTAMP,
+        pLHSECS     => DBMS_UTILITY.GET_TIME,
+        pLLEVEL     => pLEVEL,
+        pLSECTION   => lLSECTION,
+        pLUSER      => USER,
+        pLTEXT      => pTEXT,
+        pLXML       => pXML );
 END log;
 
+--******************************************************************************
+--  PROCEDURE log
+--
+--        pCTX             log context
+--        pLEVEL           log level as numeric value
+--        pTEXT            log text
+--
+--   Public. 
+--
+--******************************************************************************
 PROCEDURE log
 (
-    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
-    pLEVEL      IN TLOGLEVEL.LCODE%TYPE,
-    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX                   ,
+    pLEVEL      IN              TLOG.LLEVEL%TYPE                    ,
+    pTEXT       IN              TLOG.LTEXT%TYPE         DEFAULT NULL
 )
+IS
+BEGIN
+    log(pCTX   => pCTX,
+        pLEVEL => pLEVEL,
+        pTEXT  => pTEXT,
+        pXML   => NULL );
+end; 
+
 --******************************************************************************
---   NAME:   log
---
---  PARAMETERS:
+-- PROCEDURE log
 --
 --        pCTX             log context
 --        pLEVEL           log level as string value
@@ -1470,25 +1587,196 @@ PROCEDURE log
 --   The parameter pTEXT is the message text. If the parameter is NULL, the
 --   log text will be filled by the Oracle error code and message.
 --
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX                   ,
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE                ,
+    pTEXT       IN              TLOG.LTEXT%TYPE         DEFAULT NULL
+)
 IS
 BEGIN
-    log(pLEVEL => PLOGPARAM.getTextInLevel(pLEVEL), pCTX => pCTX, pTEXT => pTEXT);
+    log(pCTX   => pCTX, 
+        pLEVEL => PLOGPARAM.getTextInLevel(pLEVEL), 
+        pTEXT  => pTEXT,
+        pXML   => NULL );
+END log;
+
+--******************************************************************************
+--  PROCEDURE log
+--
+--        pCTX             log context
+--        pLEVEL           log level as numeric value
+--        pTEXT            log text
+--
+--   Public. 
+--
+--******************************************************************************
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLEVEL      IN              TLOG.LLEVEL%TYPE,
+    pLOGMESSAGE IN              LOGMESSAGE
+)
+IS
+BEGIN
+    log(pCTX        => pCTX,
+        pLEVEL      => pLEVEL,
+        pTEXT       => logmessageToJsonDict(pLOGMESSAGE),
+        pXML        => NULL );
+end; 
+
+--******************************************************************************
+-- PROCEDURE log
+--
+--        pCTX             log context
+--        pLEVEL           log level as string value
+--        pTEXT            log text
+--        pXML             XML data to archive
+--
+--   Public. Log a message of a specificated level (parameter pLEVEL: INFO, DEBUG ...)
+--   using a specific log context.
+--   The parameter pTEXT is the message text. If the parameter is NULL, the
+--   log text will be filled by the Oracle error code and message.
+--
+--******************************************************************************
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE,
+    pTEXT       IN              TLOG.LTEXT%TYPE,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pCTX   => pCTX,
+        pLEVEL => PLOGPARAM.getTextInLevel(pLEVEL), 
+        pTEXT  => pTEXT,
+        pXML   => pXML );
+END log;
+
+--******************************************************************************
+-- PROCEDURE log
+--
+--        pCTX             log context
+--        pLEVEL           log level as string value
+--        pXML             XML data to archive
+--
+--   Public. Log a message of a specificated level (parameter pLEVEL: INFO, DEBUG ...)
+--   using a specific log context.
+--   The parameter pXML is the XML to archive. 
+--
+--******************************************************************************
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pCTX   => pCTX, 
+        pLEVEL => PLOGPARAM.getTextInLevel(pLEVEL), 
+        pTEXT  => NULL,
+        pXML   => pXML );
+END log;
+
+--******************************************************************************
+-- PROCEDURE log
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. 
+--
+--******************************************************************************
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLEVEL      IN              TLOG.LLEVEL%TYPE,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pCTX   => pCTX, 
+        pLEVEL => pLEVEL, 
+        pTEXT  => NULL,
+        pXML   => pXML  );
+END log;
+
+--******************************************************************************
+-- PROCEDURE log
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. 
+--
+--******************************************************************************
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE,
+    pLOGMESSAGE IN              LOGMESSAGE
+)
+IS
+BEGIN
+    log(pCTX   => pCTX, 
+        pLEVEL => PLOGPARAM.getTextInLevel(pLEVEL), 
+        pTEXT  => logmessageToJsonDict(pLOGMESSAGE),
+        pXML   => NULL );
+END log;
+
+--******************************************************************************
+-- PROCEDURE log
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--        pXML             XML data to archive
+--
+--   Public. 
+--
+--******************************************************************************
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE,
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pCTX    => pCTX, 
+        pLEVEL  => PLOGPARAM.getTextInLevel(pLEVEL), 
+        pTEXT   => logmessageToJsonDict(pLOGMESSAGE),
+        pXML    => pXML );
+END log;
+
+--******************************************************************************
+-- PROCEDURE log
+--
+--        pCTX             log context
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--        pXML             XML data to archive
+--
+--   Public. 
+--
+--******************************************************************************
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLEVEL      IN              TLOG.LLEVEL%TYPE,
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pCTX    => pCTX, 
+        pLEVEL  => pLEVEL, 
+        pTEXT   => logmessageToJsonDict(pLOGMESSAGE),
+        pXML    => pXML );
 END log;
 
 
-PROCEDURE log
-(
-    pLEVEL     IN TLOG.LLEVEL%TYPE,
-    pTEXT      IN TLOG.LTEXT%TYPE DEFAULT NULL
-)
 --******************************************************************************
---   NAME:   log
---
---  PARAMETERS:
+-- PROCEDURE log
 --
 --        pLEVEL           log level as numeric value
 --        pTEXT            log text
@@ -1498,25 +1786,127 @@ PROCEDURE log
 --   The parameter pTEXT is the message text. If the parameter is NULL, the
 --   log text will be filled by the Oracle error code and message.
 --
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
-IS
-   generiqueCTX PLOGPARAM.LOG_CTX := getDefaultContext;
-BEGIN
-    LOG(pLEVEL => pLEVEL, pCTX => generiqueCTX, pTEXT => pTEXT);
-END log;
-
 PROCEDURE log
 (
-    pLEVEL      IN TLOGLEVEL.LCODE%TYPE,
-    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
+    pLEVEL     IN               TLOG.LLEVEL%TYPE                ,
+    pTEXT      IN               TLOG.LTEXT%TYPE     DEFAULT NULL
 )
+IS
+    generiqueCTX PLOGPARAM.LOG_CTX := getDefaultContext;
+BEGIN
+    log(pCTX   => generiqueCTX,
+        pLEVEL => pLEVEL, 
+        pTEXT  => pTEXT,
+        pXML   => NULL );
+END log;
+
 --******************************************************************************
---   NAME:   log
+-- PROCEDURE log
 --
---  PARAMETERS:
+--        pLEVEL           log level as numeric value
+--        pTEXT            log text
+--
+--   Public. Log a message of a specificated level (parameter pLEVEL: 10, 20 ...)
+--   using the default log context.
+--   The parameter pTEXT is the message text. If the parameter is NULL, the
+--   log text will be filled by the Oracle error code and message.
+--
+--******************************************************************************
+PROCEDURE log
+(
+    pLEVEL     IN               TLOG.LLEVEL%TYPE                ,
+    pTEXT      IN               TLOG.LTEXT%TYPE                 ,
+    pXML       IN               TLOG.LXML%TYPE
+)
+IS
+    generiqueCTX PLOGPARAM.LOG_CTX := getDefaultContext;
+BEGIN
+    log(pCTX   => generiqueCTX, 
+        pLEVEL => pLEVEL, 
+        pTEXT  => pTEXT,
+        pXML   => pXML );
+END log;
+
+--******************************************************************************
+-- PROCEDURE log
+--
+--        pLEVEL           log level as numeric value
+--        pTEXT            log text
+--
+--   Public. Log a message of a specificated level (parameter pLEVEL: 10, 20 ...)
+--   using the default log context.
+--   The parameter pTEXT is the message text. If the parameter is NULL, the
+--   log text will be filled by the Oracle error code and message.
+--
+--******************************************************************************
+PROCEDURE log
+(
+    pLEVEL     IN               TLOGLEVEL.LCODE%TYPE            ,
+    pTEXT      IN               TLOG.LTEXT%TYPE                 ,
+    pXML       IN               TLOG.LXML%TYPE
+)
+IS
+    generiqueCTX PLOGPARAM.LOG_CTX := getDefaultContext;
+BEGIN
+    log(pCTX   => generiqueCTX, 
+        pLEVEL => PLOGPARAM.getTextInLevel(pLEVEL), 
+        pTEXT  => pTEXT,
+        pXML   => pXML );
+END log;
+
+--******************************************************************************
+-- PROCEDURE log
+--
+--        pLEVEL           log level as numeric value
+--        pXML             XML data to archive
+--
+--   Public. Log a message of a specificated level (parameter pLEVEL: 10, 20 ...)
+--   using the default log context.
+--
+--******************************************************************************
+PROCEDURE log
+(
+    pLEVEL     IN               TLOG.LLEVEL%TYPE                ,
+    pXML       IN               TLOG.LXML%TYPE
+)
+IS
+    generiqueCTX PLOGPARAM.LOG_CTX := getDefaultContext;
+BEGIN
+    log(pCTX   => generiqueCTX, 
+        pLEVEL => pLEVEL, 
+        pTEXT  => NULL,
+        pXML   => pXML );
+END log;
+
+--******************************************************************************
+-- PROCEDURE log
+--
+--        pCTX             log context
+--        pLEVEL           log level as string value
+--        pXML             XML data to archive
+--
+--   Public. Log a message of a specificated level (parameter pLEVEL: INFO, DEBUG ...)
+--   using a specific log context.
+--   The parameter pXML is the XML to archive. 
+--
+--******************************************************************************
+PROCEDURE log
+(
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+    generiqueCTX PLOGPARAM.LOG_CTX := getDefaultContext;
+BEGIN
+    log(pCTX   => generiqueCTX, 
+        pLEVEL => PLOGPARAM.getTextInLevel(pLEVEL), 
+        pTEXT  => NULL,
+        pXML   => pXML );
+END log;
+
+--******************************************************************************
+-- PROCEDURE log
 --
 --        pLEVEL           log level as string value
 --        pTEXT            log text
@@ -1526,25 +1916,143 @@ PROCEDURE log
 --   The parameter pTEXT is the message text. If the parameter is NULL, the
 --   log text will be filled by the Oracle error code and message.
 --
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
+PROCEDURE log
+(
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE            , 
+    pTEXT       IN              TLOG.LTEXT%TYPE      DEFAULT NULL
+)
 IS
+    generiqueCTX PLOGPARAM.LOG_CTX := getDefaultContext;
 BEGIN
-    log(pLEVEL => PLOGPARAM.getTextInLevel(pLEVEL), pTEXT => pTEXT);
+    log(pCTX   => generiqueCTX, 
+        pLEVEL => PLOGPARAM.getTextInLevel(pLEVEL), 
+        pTEXT  => pTEXT,
+        pXML   => NULL );
+END log;
+
+--******************************************************************************
+-- PROCEDURE log
+--
+--        pCTX             log context
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. 
+--
+--******************************************************************************
+PROCEDURE log
+(
+    pLEVEL      IN              TLOG.LLEVEL%TYPE,
+    pLOGMESSAGE IN              LOGMESSAGE
+)
+IS
+    generiqueCTX PLOGPARAM.LOG_CTX := getDefaultContext;
+BEGIN
+    log(pCTX   => generiqueCTX, 
+        pLEVEL => pLEVEL, 
+        pTEXT  => logmessageToJsonDict(pLOGMESSAGE),
+        pXML   => NULL );
+END log;
+
+--******************************************************************************
+-- PROCEDURE log
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. 
+--
+--******************************************************************************
+PROCEDURE log
+(
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE,
+    pLOGMESSAGE IN              LOGMESSAGE
+)
+IS
+    generiqueCTX PLOGPARAM.LOG_CTX := getDefaultContext;
+BEGIN
+    log(pCTX   => generiqueCTX, 
+        pLEVEL => PLOGPARAM.getTextInLevel(pLEVEL), 
+        pTEXT  => logmessageToJsonDict(pLOGMESSAGE),
+        pXML   => NULL );
+END log;
+
+--******************************************************************************
+-- PROCEDURE log
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--        pXML             XML data to archive
+--
+--   Public. 
+--
+--******************************************************************************
+PROCEDURE log
+(
+    pLEVEL      IN TLOGLEVEL.LCODE%TYPE,
+    pLOGMESSAGE IN LOGMESSAGE,
+    pXML        IN TLOG.LXML%TYPE
+)
+IS
+    generiqueCTX PLOGPARAM.LOG_CTX := getDefaultContext;
+BEGIN
+    log(pCTX   => generiqueCTX,
+        pLEVEL => PLOGPARAM.getTextInLevel(pLEVEL),
+        pTEXT  => logmessageToJsonDict(pLOGMESSAGE), 
+        pXML   => pXML );
 END log;
 
 
+--******************************************************************************
+-- PROCEDURE debug
+--
+--        pCTX             log context
+--        pTEXT            log text
+--        pXML             XML data to archive
+--
+--   Public. Log a message of debug level using a specific log context.
+--   The parameter pTEXT is the message text. If the parameter is NULL, the
+--   log text will be filled by the Oracle error code and message.
+--******************************************************************************
 PROCEDURE debug
 (
-    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
-    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pTEXT       IN              TLOG.LTEXT%TYPE DEFAULT NULL,
+    pXML        IN              TLOG.LXML%TYPE
 )
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('DEBUG'), 
+        pCTX => pCTX, 
+        pTEXT => pTEXT,
+        pXML => pXML );
+END debug;
+
 --******************************************************************************
---   NAME:   debug
+-- PROCEDURE debug
 --
---  PARAMETERS:
+--        pCTX             log context
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--        pXML             XML data to archive
+--
+--   Public. Log a message of debug level using a specific log context.
+--   The parameter pLOGMESSAGE is the key, value pair dictionary. 
+--   If the parameter is NULL, the log text will be filled by the Oracle error 
+--   code and message.
+--******************************************************************************
+PROCEDURE debug
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    debug(pCTX => pCTX, 
+        pTEXT => logmessageToJsonDict(pLOGMESSAGE),
+        pXML => pXML);
+END debug;
+
+--******************************************************************************
+-- PROCEDURE debug
 --
 --        pCTX             log context
 --        pTEXT            log text
@@ -1553,13 +2061,106 @@ PROCEDURE debug
 --   The parameter pTEXT is the message text. If the parameter is NULL, the
 --   log text will be filled by the Oracle error code and message.
 --
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
+PROCEDURE debug
+(
+    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
+    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
+)
+
 IS
 BEGIN
-    log(pLEVEL => PLOGPARAM.getTextInLevel('DEBUG'), pCTX => pCTX, pTEXT => pTEXT);
+    log(pLEVEL => PLOGPARAM.getTextInLevel('DEBUG'), 
+        pCTX => pCTX, 
+        pTEXT => pTEXT);
+END debug;
+
+--******************************************************************************
+--   PROCEDURE debug
+--
+--        pCTX             log context
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. Log a message of debug level using a specific log context.
+--   The parameter pLOGMESSAGE is the key, value pair dictionary. 
+--   If the parameter is NULL, the log text will be filled by the Oracle error 
+--   code and message.
+--
+--******************************************************************************
+PROCEDURE debug
+(
+    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN LOGMESSAGE
+)
+IS
+BEGIN
+    debug(pCTX => pCTX, 
+          pTEXT => logmessageToJsonDict(pLOGMESSAGE));
+END debug;
+
+--******************************************************************************
+--   PROCEDURE debug
+--
+--        pCTX             log context
+--        pXML              XML data to archive
+--
+--   Public. Log a message of debug level using a specific log context.
+--   The parameter pLOGMESSAGE is the key, value pair dictionary. 
+--   If the parameter is NULL, the log text will be filled by the Oracle error 
+--   code and message.
+--
+--******************************************************************************
+PROCEDURE debug
+(
+    pCTX       IN OUT NOCOPY    PLOGPARAM.LOG_CTX,
+    pXML       IN               TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pCTX => pCTX, 
+        pLEVEL => PLOGPARAM.getTextInLevel('DEBUG'), 
+        pXML => pXML );
+END debug;
+
+--******************************************************************************
+-- PROCEDURE debug
+--
+--        pTEXT            log text
+--        pXML             XML data to archive
+--
+--   Public. Log a message of debug level using the default log context.
+--   The parameter pTEXT is the message text. If the parameter is NULL, the
+--   log text will be filled by the Oracle error code and message.
+--******************************************************************************
+PROCEDURE debug
+(
+    pTEXT      IN               TLOG.LTEXT%TYPE     DEFAULT NULL,
+    pXML       IN               TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('DEBUG'), 
+        pTEXT => pTEXT,
+        pXML => pXML);
+END debug;
+
+--******************************************************************************
+-- PROCEDURE debug
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--        pXML             XML data to archive
+--
+--   Public. 
+--******************************************************************************
+PROCEDURE debug
+(
+    pLOGMESSAGE IN               LOGMESSAGE,
+    pXML        IN               TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    debug(pTEXT => logmessageToJsonDict(pLOGMESSAGE),
+          pXML => pXML);
 END debug;
 
 PROCEDURE debug
@@ -1567,9 +2168,7 @@ PROCEDURE debug
     pTEXT      IN TLOG.LTEXT%TYPE DEFAULT NULL
 )
 --******************************************************************************
---   NAME:   debug
---
---  PARAMETERS:
+-- PROCEDURE debug
 --
 --        pTEXT            log text
 --
@@ -1577,25 +2176,54 @@ PROCEDURE debug
 --   The parameter pTEXT is the message text. If the parameter is NULL, the
 --   log text will be filled by the Oracle error code and message.
 --
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
 IS
 BEGIN
-    log(pLEVEL => PLOGPARAM.getTextInLevel('DEBUG'), pTEXT => pTEXT);
+    log(pLEVEL => PLOGPARAM.getTextInLevel('DEBUG'), 
+        pTEXT => pTEXT);
+END debug;
+
+--******************************************************************************
+-- PROCEDURE debug
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. 
+--
+--******************************************************************************
+PROCEDURE debug
+(
+    pLOGMESSAGE IN LOGMESSAGE
+)
+IS
+BEGIN
+    debug(pTEXT => logmessageToJsonDict(pLOGMESSAGE));
+END debug;
+
+--******************************************************************************
+-- PROCEDURE debug
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. 
+--
+--   Ver    Date        Autor             Comment
+--   -----  ----------  ---------------   --------------------------------------
+--          2013-12-09  Alan Gibson
+--******************************************************************************
+PROCEDURE debug
+(
+    pXML        IN               TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('DEBUG'), 
+        pXML => pXML);
 END debug;
 
 
-PROCEDURE info
-(
-    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
-    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
-)
 --******************************************************************************
---   NAME:   info
---
---  PARAMETERS:
+-- PROCEDURE info
 --
 --        pCTX             log context
 --        pTEXT            log text
@@ -1603,40 +2231,217 @@ PROCEDURE info
 --   Public. Log a message of information level using a specific log context.
 --   The parameter pTEXT is the message text. If the parameter is NULL, the
 --   log text will be filled by the Oracle error code and message.
---
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
-IS
-BEGIN
-    log(pLEVEL => PLOGPARAM.getTextInLevel('INFO'), pCTX => pCTX,  pTEXT => pTEXT);
-END info;
-
 PROCEDURE info
 (
-    pTEXT      IN TLOG.LTEXT%TYPE DEFAULT NULL
+    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
+    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
 )
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('INFO'), 
+        pCTX => pCTX,  
+        pTEXT => pTEXT);
+END info;
+
 --******************************************************************************
---   NAME:   info
+-- PROCEDURE info
 --
---  PARAMETERS:
+--        pCTX             log context
+--        pXML
+--
+--   Public. Log a message of information level using a specific log context.
+--******************************************************************************
+PROCEDURE info
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('INFO'), 
+        pCTX   => pCTX,  
+        pTEXT  => NULL,
+        pXML   => pXML);
+END info;
+
+--******************************************************************************
+-- PROCEDURE info
 --
 --        pTEXT            log text
 --
 --   Public. Log a message of info level using the default log context.
 --   The parameter pTEXT is the message text. If the parameter is NULL, the
 --   log text will be filled by the Oracle error code and message.
+--******************************************************************************
+PROCEDURE info
+(
+    pTEXT      IN TLOG.LTEXT%TYPE DEFAULT NULL
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('INFO'),  
+        pTEXT => pTEXT);
+END info;
+
+PROCEDURE info
+(
+    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN LOGMESSAGE
+)
+--******************************************************************************
+-- PROCEDURE info
+--
+--        pCTX             log context
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. Log a message of debug level using a specific log context.
+--   The parameter pLOGMESSAGE is the key, value pair dictionary. 
+--   If the parameter is NULL, the log text will be filled by the Oracle error 
+--   code and message.
 --
 --   Ver    Date        Autor             Comment
 --   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
+--          2013-12-09  Alan Gibson           
 --******************************************************************************
 IS
 BEGIN
-    log(pLEVEL => PLOGPARAM.getTextInLevel('INFO'),  pTEXT => pTEXT);
+    info(pCTX => pCTX, pTEXT => logmessageToJsonDict(pLOGMESSAGE));
 END info;
 
+PROCEDURE info
+(
+    pLOGMESSAGE IN LOGMESSAGE
+)
+--******************************************************************************
+--   NAME:   debug
+--
+--  PARAMETERS:
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. Log a message of error level using the default log context.
+--   The parameter pTEXT is the message text. If the parameter is NULL, the
+--   log text will be filled by the Oracle error code and message.
+--
+--   Ver    Date        Autor             Comment
+--   -----  ----------  ---------------   --------------------------------------
+--          2013-12-09  Alan Gibson
+--******************************************************************************
+IS
+BEGIN
+    info(pTEXT => logmessageToJsonDict(pLOGMESSAGE));
+END info;
+
+--******************************************************************************
+-- PROCEDURE info
+--
+--        pCTX             log context
+--        pTEXT            log text
+--        pXML             XML data to archive
+--
+--   Public. Log a message of info level using a specific log context.
+--   The parameter pTEXT is the message text. If the parameter is NULL, the
+--   log text will be filled by the Oracle error code and message.
+--******************************************************************************
+PROCEDURE info
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pTEXT       IN              TLOG.LTEXT%TYPE DEFAULT NULL,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('INFO'), 
+        pCTX => pCTX, 
+        pTEXT => pTEXT,
+        pXML => pXML );
+END info;
+
+--******************************************************************************
+-- PROCEDURE info
+--
+--        pTEXT            log text
+--        pXML             XML data to archive
+--
+--   Public. Log a message of info level using the default log context.
+--   The parameter pTEXT is the message text. If the parameter is NULL, the
+--   log text will be filled by the Oracle error code and message.
+--******************************************************************************
+PROCEDURE info
+(
+    pTEXT      IN               TLOG.LTEXT%TYPE     DEFAULT NULL,
+    pXML       IN               TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('INFO'), 
+        pTEXT => pTEXT,
+        pXML => pXML);
+END info;
+
+--******************************************************************************
+-- PROCEDURE info
+--
+--        pCTX             log context
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--        pXML             XML data to archive
+--
+--   Public. Log a message of info level using a specific log context.
+--   The parameter pLOGMESSAGE is the key, value pair dictionary. 
+--   If the parameter is NULL, the log text will be filled by the Oracle error 
+--   code and message.
+--******************************************************************************
+PROCEDURE info
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    info(pCTX => pCTX, 
+        pTEXT => logmessageToJsonDict(pLOGMESSAGE),
+        pXML => pXML);
+END info;
+
+--******************************************************************************
+-- PROCEDURE info
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--        pXML             XML data to archive
+--
+--   Public. 
+--******************************************************************************
+PROCEDURE info
+(
+    pLOGMESSAGE IN               LOGMESSAGE,
+    pXML        IN               TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    info(pTEXT => logmessageToJsonDict(pLOGMESSAGE),
+        pXML => pXML);
+END info;
+
+--******************************************************************************
+-- PROCEDURE info
+--
+--        pXML             XML data to archive
+--
+--   Public. Log a message of info level using the default log context.
+--   The parameter pTEXT is the message text. If the parameter is NULL, the
+--   log text will be filled by the Oracle error code and message.
+--******************************************************************************
+PROCEDURE info
+(
+    pXML        IN               TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('INFO'),  
+        pXML => pXML);
+END info;
 
 PROCEDURE warn
 (
@@ -1666,26 +2471,193 @@ END warn;
 
 PROCEDURE warn
 (
-    pTEXT      IN TLOG.LTEXT%TYPE DEFAULT NULL
+    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN LOGMESSAGE
 )
 --******************************************************************************
 --   NAME:   warn
 --
 --  PARAMETERS:
 --
+--        pCTX             log context
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. 
+--
+--   Ver    Date        Autor             Comment
+--   -----  ----------  ---------------   --------------------------------------
+--          2013-12-09  Alan Gibson           
+--******************************************************************************
+IS
+BEGIN
+    warn(pCTX => pCTX, pTEXT => logmessageToJsonDict(pLOGMESSAGE));
+END warn;
+
+
+
+--******************************************************************************
+-- PROCEDURE warn
+--
+--        pCTX             log context
+--        pTEXT            log text
+--        pXML             XML data to archive
+--
+--   Public. Log a message of warn level using a specific log context.
+--   The parameter pTEXT is the message text. If the parameter is NULL, the
+--   log text will be filled by the Oracle error code and message.
+--******************************************************************************
+PROCEDURE warn
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pTEXT       IN              TLOG.LTEXT%TYPE DEFAULT NULL,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('WARN'), 
+        pCTX => pCTX, 
+        pTEXT => pTEXT,
+        pXML => pXML );
+END warn;
+
+--******************************************************************************
+-- PROCEDURE warn
+--
+--        pTEXT            log text
+--        pXML             XML data to archive
+--
+--   Public. Log a message of warn level using the default log context.
+--   The parameter pTEXT is the message text. If the parameter is NULL, the
+--   log text will be filled by the Oracle error code and message.
+--******************************************************************************
+PROCEDURE warn
+(
+    pTEXT      IN               TLOG.LTEXT%TYPE     DEFAULT NULL,
+    pXML       IN               TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('WARN'), 
+        pTEXT => pTEXT,
+        pXML => pXML);
+END warn;
+
+--******************************************************************************
+-- PROCEDURE warn
+--
+--        pCTX             log context
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--        pXML             XML data to archive
+--
+--   Public. Log a message of warn level using a specific log context.
+--   The parameter pLOGMESSAGE is the key, value pair dictionary. 
+--   If the parameter is NULL, the log text will be filled by the Oracle error 
+--   code and message.
+--******************************************************************************
+PROCEDURE warn
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    warn(pCTX => pCTX, 
+        pTEXT => logmessageToJsonDict(pLOGMESSAGE),
+        pXML => pXML);
+END warn;
+
+--******************************************************************************
+-- PROCEDURE warn
+--
+--        pCTX             log context
+--        pXML             XML data to archive
+--
+--   Public. Log a message of warn level using a specific log context.
+--******************************************************************************
+PROCEDURE warn
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pCTX   => pCTX, 
+        pLEVEL => PLOGPARAM.getTextInLevel('WARN'), 
+        pTEXT  => NULL,
+        pXML   => pXML );
+END warn;
+
+--******************************************************************************
+-- PROCEDURE warn
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--        pXML             XML data to archive
+--
+--   Public. 
+--******************************************************************************
+PROCEDURE warn
+(
+    pLOGMESSAGE IN               LOGMESSAGE,
+    pXML        IN               TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    warn(pTEXT => logmessageToJsonDict(pLOGMESSAGE),
+         pXML => pXML);
+END warn;
+
+--******************************************************************************
+-- PROCEDURE warn
+--
 --        pTEXT            log text
 --
 --   Public. Log a message of warning level using the default log context.
 --   The parameter pTEXT is the message text. If the parameter is NULL, the
 --   log text will be filled by the Oracle error code and message.
---
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
+PROCEDURE warn
+(
+    pTEXT      IN TLOG.LTEXT%TYPE DEFAULT NULL
+)
 IS
 BEGIN
-    LOG(pLEVEL => PLOGPARAM.getTextInLevel('WARN'),  pTEXT => pTEXT);
+    log(pLEVEL => PLOGPARAM.getTextInLevel('WARN'),  
+        pTEXT => pTEXT );
+END warn;
+
+--******************************************************************************
+-- PROCEDURE warn
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. 
+--******************************************************************************
+PROCEDURE warn
+(
+    pLOGMESSAGE IN LOGMESSAGE
+)
+IS
+BEGIN
+    warn(pTEXT => logmessageToJsonDict(pLOGMESSAGE));
+END warn;
+
+--******************************************************************************
+-- PROCEDURE warn
+--
+--        pXML
+--
+--   Public. Log a message of warning level using the default log context.
+--******************************************************************************
+PROCEDURE warn
+(
+    pXML        IN               TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('WARN'),  
+        pTEXT  => NULL,
+        pXML   => pXML );
 END warn;
 
 
@@ -1715,40 +2687,253 @@ BEGIN
     log(pLEVEL => PLOGPARAM.getTextInLevel('ERROR'), pCTX => pCTX,  pTEXT => pTEXT);
 END error;
 
+
+
 PROCEDURE error
 (
-    pTEXT      IN TLOG.LTEXT%TYPE DEFAULT NULL
+    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN LOGMESSAGE
 )
-IS
 --******************************************************************************
 --   NAME:   error
 --
 --  PARAMETERS:
+--
+--        pCTX             log context
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. 
+--
+--   Ver    Date        Autor             Comment
+--   -----  ----------  ---------------   --------------------------------------
+--          2013-12-09  Alan Gibson           
+--******************************************************************************
+IS
+BEGIN
+    error(pCTX => pCTX, pTEXT => logmessageToJsonDict(pLOGMESSAGE));
+END error;
+
+
+--******************************************************************************
+-- PROCEDURE error
+--
+--        pCTX             log context
+--        pTEXT            log text
+--        pXML             XML data to archive
+--
+--   Public. Log a message of error level using a specific log context.
+--   The parameter pTEXT is the message text. If the parameter is NULL, the
+--   log text will be filled by the Oracle error code and message.
+--******************************************************************************
+PROCEDURE error
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pTEXT       IN              TLOG.LTEXT%TYPE DEFAULT NULL,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('ERROR'), 
+        pCTX => pCTX, 
+        pTEXT => pTEXT,
+        pXML => pXML );
+END error;
+
+--******************************************************************************
+-- PROCEDURE error
+--
+--        pCTX             log context
+--        pXML             XML data to archive
+--
+--   Public. Log a message of error level using a specific log context.
+--******************************************************************************
+PROCEDURE error
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('ERROR'), 
+        pCTX   => pCTX, 
+        pTEXT  => NULL,
+        pXML   => pXML );
+END error;
+
+--******************************************************************************
+-- PROCEDURE error
+--
+--        pTEXT            log text
+--        pXML             XML data to archive
+--
+--   Public. Log a message of error level using the default log context.
+--   The parameter pTEXT is the message text. If the parameter is NULL, the
+--   log text will be filled by the Oracle error code and message.
+--******************************************************************************
+PROCEDURE error
+(
+    pTEXT      IN               TLOG.LTEXT%TYPE     DEFAULT NULL,
+    pXML       IN               TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('ERROR'), 
+        pTEXT => pTEXT,
+        pXML => pXML);
+END error;
+
+--******************************************************************************
+-- PROCEDURE error
+--
+--        pCTX             log context
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--        pXML             XML data to archive
+--
+--   Public. Log a message of error level using a specific log context.
+--   The parameter pLOGMESSAGE is the key, value pair dictionary. 
+--   If the parameter is NULL, the log text will be filled by the Oracle error 
+--   code and message.
+--******************************************************************************
+PROCEDURE error
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    error(pCTX => pCTX, 
+        pTEXT => logmessageToJsonDict(pLOGMESSAGE),
+        pXML => pXML);
+END error;
+
+--******************************************************************************
+-- PROCEDURE error
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--        pXML             XML data to archive
+--
+--   Public. 
+--******************************************************************************
+PROCEDURE error
+(
+    pLOGMESSAGE IN               LOGMESSAGE,
+    pXML        IN               TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    error(pTEXT => logmessageToJsonDict(pLOGMESSAGE),
+        pXML => pXML);
+END error;
+
+--******************************************************************************
+-- PROCEDURE error
 --
 --        pTEXT            log text
 --
 --   Public. Log a message of error level using the default log context.
 --   The parameter pTEXT is the message text. If the parameter is NULL, the
 --   log text will be filled by the Oracle error code and message.
---
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
+PROCEDURE error
+(
+    pTEXT      IN TLOG.LTEXT%TYPE DEFAULT NULL
+)
+IS
 BEGIN
-    LOG(pLEVEL => PLOGPARAM.getTextInLevel('ERROR'),  pTEXT => pTEXT);
+    log(pLEVEL => PLOGPARAM.getTextInLevel('ERROR'),  
+        pTEXT => pTEXT);
+END error;
+
+--******************************************************************************
+-- PROCEDURE error
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. 
+--******************************************************************************
+PROCEDURE error
+(
+    pLOGMESSAGE IN LOGMESSAGE
+)
+IS
+BEGIN
+    error(pTEXT => logmessageToJsonDict(pLOGMESSAGE));
+END error;
+
+--******************************************************************************
+-- PROCEDURE error
+--
+--        pTEXT            log text
+--
+--   Public. Log a message of error level using the default log context.
+--
+--******************************************************************************
+PROCEDURE error
+(
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    LOG(pLEVEL => PLOGPARAM.getTextInLevel('ERROR'),  
+        pTEXT  => NULL,
+        pXML   => pXML );
 END error;
 
 
+--******************************************************************************
+-- PROCEDURE fatal
+--
+--        pCTX             log context
+--        pTEXT            log text
+--        pXML             XML data to archive
+--
+--   Public. Log a message of fatal level using a specific log context.
+--   The parameter pTEXT is the message text. If the parameter is NULL, the
+--   log text will be filled by the Oracle error code and message.
+--******************************************************************************
 PROCEDURE fatal
 (
-    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX                      ,
-    pTEXT      IN TLOG.LTEXT%TYPE  DEFAULT NULL
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX               ,
+    pTEXT       IN              TLOG.LTEXT%TYPE     DEFAULT NULL,
+    pXML        IN              TLOG.LXML%TYPE
 )
+IS
+BEGIN
+    log(pCTX   => pCTX,
+        pLEVEL => PLOGPARAM.getTextInLevel('FATAL'), 
+        pTEXT  => pTEXT,
+        pXML   => pXML );
+END fatal;
+
 --******************************************************************************
---   NAME:   fatal
+-- PROCEDURE fatal
 --
---  PARAMETERS:
+--        pCTX             log context
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--        pXML             XML data to archive
+--
+--   Public. Log a message of fatal level using a specific log context.
+--   The parameter pLOGMESSAGE is the key, value pair dictionary. 
+--   If the parameter is NULL, the log text will be filled by the Oracle error 
+--   code and message.
+--******************************************************************************
+PROCEDURE fatal
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pCTX   => pCTX, 
+        pLEVEL => PLOGPARAM.getTextInLevel('FATAL'), 
+        pTEXT  => logmessageToJsonDict(pLOGMESSAGE),
+        pXML   => pXML );
+END fatal;
+
+--******************************************************************************
+-- PROCEDURE fatal
 --
 --        pCTX             log context
 --        pTEXT            log text
@@ -1756,39 +2941,162 @@ PROCEDURE fatal
 --   Public. Log a message of fatal level using a specific log context.
 --   The parameter pTEXT is the message text. If the parameter is NULL, the
 --   log text will be filled by the Oracle error code and message.
---
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
-IS
-BEGIN
-    log(pLEVEL => PLOGPARAM.getTextInLevel('FATAL'), pCTX => pCTX,  pTEXT => pTEXT);
-END fatal;
-
 PROCEDURE fatal
 (
-    pTEXT      IN TLOG.LTEXT%TYPE DEFAULT NULL
+    pCTX    IN OUT NOCOPY   PLOGPARAM.LOG_CTX               ,
+    pTEXT   IN              TLOG.LTEXT%TYPE     DEFAULT NULL
 )
+IS
+BEGIN
+    log(pCTX   => pCTX,
+        pLEVEL => PLOGPARAM.getTextInLevel('FATAL'), 
+        pTEXT  => pTEXT,
+        pXML   => NULL );
+END fatal;
+
 --******************************************************************************
---   NAME:   fatal
+-- PROCEDURE fatal
 --
---  PARAMETERS:
+--        pCTX             log context
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. 
+--******************************************************************************
+PROCEDURE fatal
+(
+    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN LOGMESSAGE
+)
+IS
+BEGIN
+    log(pCTX   => pCTX, 
+        pLEVEL => PLOGPARAM.getTextInLevel('FATAL'), 
+        pTEXT  => logmessageToJsonDict(pLOGMESSAGE),
+        pXML   => NULL );
+END fatal;
+
+--******************************************************************************
+-- PROCEDURE fatal
+--
+--        pCTX             log context
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. 
+--******************************************************************************
+PROCEDURE fatal
+(
+    pCTX       IN OUT NOCOPY    PLOGPARAM.LOG_CTX,
+    pXML       IN               TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pCTX   => pCTX, 
+        pLEVEL => PLOGPARAM.getTextInLevel('FATAL'), 
+        pTEXT  => NULL,
+        pXML   => pXML );
+END fatal;
+
+--******************************************************************************
+-- PROCEDURE fatal
+--
+--        pTEXT            log text
+--        pXML             XML data to archive
+--
+--   Public. Log a message of fatal level using the default log context.
+--   The parameter pTEXT is the message text. If the parameter is NULL, the
+--   log text will be filled by the Oracle error code and message.
+--******************************************************************************
+PROCEDURE fatal
+(
+    pTEXT      IN               TLOG.LTEXT%TYPE     DEFAULT NULL,
+    pXML       IN               TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('FATAL'), 
+        pTEXT => pTEXT,
+        pXML => pXML );
+END fatal;
+
+--******************************************************************************
+-- PROCEDURE fatal
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--        pXML             XML data to archive
+--
+--   Public. 
+--******************************************************************************
+PROCEDURE fatal
+(
+    pLOGMESSAGE IN               LOGMESSAGE,
+    pXML        IN               TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('FATAL'), 
+        pTEXT  => logmessageToJsonDict(pLOGMESSAGE),
+        pXML   => pXML );
+END fatal;
+
+--******************************************************************************
+-- PROCEDURE fatal
 --
 --        pTEXT            log text
 --
 --   Public. Log a message of fatal level using the default log context.
 --   The parameter pTEXT is the message text. If the parameter is NULL, the
 --   log text will be filled by the Oracle error code and message.
---
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
 --******************************************************************************
+PROCEDURE fatal
+(
+    pTEXT      IN               TLOG.LTEXT%TYPE     DEFAULT NULL
+)
 IS
 BEGIN
-    log(pLEVEL => PLOGPARAM.getTextInLevel('FATAL'),  pTEXT => pTEXT);
+    log(pLEVEL => PLOGPARAM.getTextInLevel('FATAL'),  
+        pTEXT  => pTEXT,
+        pXML   => NULL );
 END fatal;
+
+--******************************************************************************
+-- PROCEDURE fatal
+--
+--        pLOGMESSAGE      Structured log message of key, value pairs
+--
+--   Public. 
+--
+--******************************************************************************
+PROCEDURE fatal
+(
+    pLOGMESSAGE IN              LOGMESSAGE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('FATAL'),  
+        pTEXT => logmessageToJsonDict(pLOGMESSAGE),
+        pXML   => NULL );
+END fatal;
+
+--******************************************************************************
+-- PROCEDURE fatal
+--
+--        pXML
+--
+--   Public. Log a message of error level using the default log context.
+--
+--******************************************************************************
+PROCEDURE fatal
+(
+    pXML        IN              TLOG.LXML%TYPE
+)
+IS
+BEGIN
+    log(pLEVEL => PLOGPARAM.getTextInLevel('FATAL'),  
+        pTEXT  => NULL,
+        pXML   => pXML );
+END fatal;
+
 
 PROCEDURE assert (
     pCTX                     IN OUT NOCOPY PLOGPARAM.LOG_CTX                        ,
@@ -1963,62 +3271,6 @@ BEGIN
                replace(dbms_utility.format_error_backtrace, 'ORA-06512: ', '');
      log(pLEVEL => PLOGPARAM.DEFAULT_FT_ERR_BTRACE_LEVEL, pCTX => pCTX,  pTEXT => LLTEXT );
 END full_error_backtrace;
-
-
-FUNCTION getLOG4PLSQVersion
-RETURN VARCHAR2
---******************************************************************************
---   NAME:   getLOG4PLSQVersion
---
---   Public. Returns the current version number as string
---
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    17.04.2008  Bertrand Caradec  Initial version
---******************************************************************************
-IS
-BEGIN
-    RETURN LOG4PLSQL_VERSION;
-END getLOG4PLSQVersion;
-
-
-
-
-
-FUNCTION isPackageInstalled
-(
-    pPackageName IN VARCHAR2
-)
-RETURN  BOOLEAN
---******************************************************************************
---   NAME:   isPackageInstalled
---
---  PARAMETERS:
---
---      pPackageName           Package to verify if it is installed
---
---   Private. Returns TRUE if the package is installed, if not FALSE.
---
---   Ver    Date        Autor             Comment
---   -----  ----------  ---------------   --------------------------------------
---   1.0    25.04.2008  Bertrand Caradec  Initial version
---******************************************************************************
-IS
-  vObjectName USER_OBJECTS.OBJECT_NAME%TYPE;
-BEGIN
-
-    SELECT OBJECT_NAME INTO vObjectName
-    FROM USER_OBJECTS
-    WHERE OBJECT_NAME = pPackageName AND
-    OBJECT_TYPE = 'PACKAGE BODY';
-
-    RETURN TRUE;
-
-EXCEPTION
-    WHEN NO_DATA_FOUND THEN
-       RETURN FALSE;
-END isPackageInstalled;
-
 
 -- end of the package
 END;

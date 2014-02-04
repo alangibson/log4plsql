@@ -44,6 +44,10 @@ PROMPT Create sequence SQ_STG ...
 
 @@create_sequence_sq_stg
 
+PROMPT Create type LOGMESSAGE ...
+
+@@create_type_logmessage
+
 PROMPT Create package PLOGPARAM ...
 
 @@ps_plogparam

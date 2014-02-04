@@ -61,9 +61,6 @@ PACKAGE             PLOG IS
  * see: <http://log4plsql.sourceforge.net>  */
 -------------------------------------------------------------------
 
-
-
-
 -------------------------------------------------------------------
 -- Constants (no modification please)
 -------------------------------------------------------------------
@@ -89,89 +86,434 @@ LDEBUG CONSTANT number := 60 ;
 -- The ALL has the lowest possible rank and is intended to turn on all logging.
 LALL   CONSTANT number := 70 ;
 
-PROCEDURE debug
-(
-    pTEXT      IN TLOG.LTEXT%TYPE DEFAULT NULL
-);
-
-PROCEDURE debug
-(
-    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
-    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
-);
-
-
-PROCEDURE info
-(
-    pTEXT      IN TLOG.LTEXT%TYPE DEFAULT NULL
-);
-PROCEDURE info
-(
-    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
-    pTEXT      IN TLOG.LTEXT%TYPE DEFAULT NULL
-);
-
-
-PROCEDURE warn
-(
-    pTEXT      IN TLOG.LTEXT%TYPE DEFAULT NULL
-);
-PROCEDURE warn
-(
-    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
-    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
-);
-
-
-PROCEDURE error
-(
-    pTEXT      IN TLOG.LTEXT%TYPE DEFAULT NULL
-);
-
-
-PROCEDURE error
-(
-    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
-    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
-);
-
-PROCEDURE fatal
-(
-    pTEXT      IN TLOG.LTEXT%TYPE DEFAULT NULL
-);
-PROCEDURE fatal
-(
-    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
-    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
-);
-
-
 PROCEDURE log
 (
-    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
-    pLEVEL      IN TLOG.LLEVEL%TYPE,
-    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX                   ,
+    pLEVEL      IN              TLOG.LLEVEL%TYPE                    ,
+    pTEXT       IN              TLOG.LTEXT%TYPE         DEFAULT NULL
 );
 
 PROCEDURE log
 (
-    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
-    pLEVEL      IN TLOGLEVEL.LCODE%TYPE,
-    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
-);
-PROCEDURE log
-(
-    pLEVEL      IN TLOG.LLEVEL%TYPE,
-    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX                   ,
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE                ,
+    pTEXT       IN              TLOG.LTEXT%TYPE         DEFAULT NULL
 );
 
 PROCEDURE log
 (
-    pLEVEL      IN TLOGLEVEL.LCODE%TYPE,
-    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
+    pLEVEL      IN              TLOG.LLEVEL%TYPE                    ,
+    pTEXT       IN              TLOG.LTEXT%TYPE         DEFAULT NULL
+);
+
+PROCEDURE log
+(
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE                ,
+    pTEXT       IN              TLOG.LTEXT%TYPE         DEFAULT NULL
 ) ;
 
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX                   ,
+    pLEVEL      IN              TLOG.LLEVEL%TYPE                    ,
+    pLOGMESSAGE IN              LOGMESSAGE
+);
 
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX                   ,
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE                ,
+    pLOGMESSAGE IN              LOGMESSAGE
+);
+
+PROCEDURE log
+(
+    pLEVEL      IN              TLOG.LLEVEL%TYPE                    ,
+    pLOGMESSAGE IN              LOGMESSAGE
+);
+
+PROCEDURE log
+(
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE                ,
+    pLOGMESSAGE IN              LOGMESSAGE
+) ;
+
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX                   ,
+    pLEVEL      IN              TLOG.LLEVEL%TYPE                    ,
+    pTEXT       IN              TLOG.LTEXT%TYPE                     ,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX                   ,
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE                ,
+    pTEXT       IN              TLOG.LTEXT%TYPE                     ,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX                   ,
+    pLEVEL      IN              TLOG.LLEVEL%TYPE                    ,
+    pLOGMESSAGE IN              LOGMESSAGE                          ,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX                   ,
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE                ,
+    pLOGMESSAGE IN              LOGMESSAGE                          ,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX                   ,
+    pLEVEL      IN              TLOG.LLEVEL%TYPE                    ,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE log
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX                   ,
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE                ,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE log
+(
+    pLEVEL     IN               TLOG.LLEVEL%TYPE                    ,
+    pTEXT      IN               TLOG.LTEXT%TYPE                     ,
+    pXML       IN               TLOG.LXML%TYPE
+);
+
+PROCEDURE log
+(
+    pLEVEL     IN               TLOGLEVEL.LCODE%TYPE                ,
+    pTEXT      IN               TLOG.LTEXT%TYPE                     ,
+    pXML       IN               TLOG.LXML%TYPE
+);
+
+PROCEDURE log
+(
+    pLEVEL      IN              TLOGLEVEL.LCODE%TYPE                ,
+    pLOGMESSAGE IN              LOGMESSAGE                          ,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE log
+(
+    pLEVEL     IN               TLOG.LLEVEL%TYPE                    ,
+    pXML       IN               TLOG.LXML%TYPE
+);
+
+PROCEDURE log
+(
+    pLEVEL     IN               TLOGLEVEL.LCODE%TYPE                ,
+    pXML       IN               TLOG.LXML%TYPE
+);
+
+
+PROCEDURE debug
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pTEXT       IN              TLOG.LTEXT%TYPE DEFAULT NULL,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE debug
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE debug
+(
+    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
+    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
+);
+
+PROCEDURE debug
+(
+    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN LOGMESSAGE
+);
+
+PROCEDURE debug
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE debug
+(
+    pTEXT      IN               TLOG.LTEXT%TYPE     DEFAULT NULL,
+    pXML       IN               TLOG.LXML%TYPE
+);
+
+PROCEDURE debug
+(
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE debug
+(
+    pTEXT      IN               TLOG.LTEXT%TYPE DEFAULT NULL
+);
+
+PROCEDURE debug
+(
+    pLOGMESSAGE IN              LOGMESSAGE
+);
+
+PROCEDURE debug
+(
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE info
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pTEXT       IN              TLOG.LTEXT%TYPE DEFAULT NULL,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE info
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE info
+(
+    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
+    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
+);
+
+PROCEDURE info
+(
+    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN LOGMESSAGE
+);
+
+PROCEDURE info
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE info
+(
+    pTEXT      IN               TLOG.LTEXT%TYPE     DEFAULT NULL,
+    pXML       IN               TLOG.LXML%TYPE
+);
+
+PROCEDURE info
+(
+    pLOGMESSAGE IN               LOGMESSAGE,
+    pXML        IN               TLOG.LXML%TYPE
+);
+
+PROCEDURE info
+(
+    pTEXT       IN TLOG.LTEXT%TYPE DEFAULT NULL
+);
+
+PROCEDURE info
+(
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE info
+(
+    pLOGMESSAGE IN LOGMESSAGE
+);
+
+PROCEDURE warn
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pTEXT       IN              TLOG.LTEXT%TYPE DEFAULT NULL,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE warn
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE warn
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pTEXT       IN              TLOG.LTEXT%TYPE DEFAULT NULL
+);
+
+PROCEDURE warn
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN              LOGMESSAGE
+);
+
+PROCEDURE warn
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pXML        IN               TLOG.LXML%TYPE
+);
+
+PROCEDURE warn
+(
+    pTEXT      IN               TLOG.LTEXT%TYPE     DEFAULT NULL,
+    pXML       IN               TLOG.LXML%TYPE
+);
+
+PROCEDURE warn
+(
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE warn
+(
+    pTEXT       IN              TLOG.LTEXT%TYPE DEFAULT NULL
+);
+
+PROCEDURE warn
+(
+    pLOGMESSAGE IN              LOGMESSAGE
+);
+
+PROCEDURE warn
+(
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+
+PROCEDURE error
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pTEXT       IN              TLOG.LTEXT%TYPE DEFAULT NULL,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE error
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE error
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pTEXT       IN              TLOG.LTEXT%TYPE DEFAULT NULL
+);
+
+PROCEDURE error
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN              LOGMESSAGE
+);
+
+PROCEDURE error
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE error
+(
+    pTEXT      IN               TLOG.LTEXT%TYPE     DEFAULT NULL,
+    pXML       IN               TLOG.LXML%TYPE
+);
+
+PROCEDURE error
+(
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE error
+(
+    pTEXT      IN               TLOG.LTEXT%TYPE DEFAULT NULL
+);
+
+PROCEDURE error
+(
+    pLOGMESSAGE IN              LOGMESSAGE
+);
+
+PROCEDURE error
+(
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+
+PROCEDURE fatal
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX               ,
+    pTEXT       IN              TLOG.LTEXT%TYPE     DEFAULT NULL,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE fatal
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE fatal
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX               ,
+    pTEXT       IN              TLOG.LTEXT%TYPE     DEFAULT NULL
+);
+
+PROCEDURE fatal
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pLOGMESSAGE IN              LOGMESSAGE
+);
+
+PROCEDURE fatal
+(
+    pCTX        IN OUT NOCOPY   PLOGPARAM.LOG_CTX,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE fatal
+(
+    pTEXT       IN              TLOG.LTEXT%TYPE     DEFAULT NULL,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE fatal
+(
+    pLOGMESSAGE IN              LOGMESSAGE,
+    pXML        IN              TLOG.LXML%TYPE
+);
+
+PROCEDURE fatal
+(
+    pTEXT      IN               TLOG.LTEXT%TYPE     DEFAULT NULL
+);
+
+PROCEDURE fatal
+(
+    pLOGMESSAGE IN              LOGMESSAGE
+);
+
+PROCEDURE fatal
+(
+    pXML        IN              TLOG.LXML%TYPE
+);
 
 
 FUNCTION init
@@ -189,10 +531,6 @@ FUNCTION init
 )
 RETURN PLOGPARAM.LOG_CTX;
 
-
-
-
-
 PROCEDURE setBeginSection
 (
     pCTX          IN OUT NOCOPY PLOGPARAM.LOG_CTX,
@@ -206,20 +544,13 @@ FUNCTION getSection
 )
 RETURN TLOG.LSECTION%TYPE;
 
-FUNCTION getSection
-RETURN TLOG.LSECTION%TYPE;
-
+FUNCTION getSection RETURN TLOG.LSECTION%TYPE;
 
 PROCEDURE setEndSection
 (
     pCTX          IN OUT NOCOPY PLOGPARAM.LOG_CTX,
     pSECTION      IN       TLOG.LSECTION%TYPE DEFAULT 'EndAllSection'
 );
-
-
-
-
-
 
 PROCEDURE setLevel
 (
@@ -233,7 +564,6 @@ PROCEDURE setLevel
     pLEVEL        IN TLOGLEVEL.LCODE%TYPE
 );
 
-
 FUNCTION getLevel
 (
     pCTX        IN PLOGPARAM.LOG_CTX
@@ -241,10 +571,7 @@ FUNCTION getLevel
 RETURN TLOG.LLEVEL%TYPE;
 
 
-FUNCTION getLevel
-RETURN TLOG.LLEVEL %TYPE;
-
-
+FUNCTION getLevel RETURN TLOG.LLEVEL %TYPE;
 
 FUNCTION isDebugEnabled
 (
@@ -252,12 +579,7 @@ FUNCTION isDebugEnabled
 )
 RETURN BOOLEAN;
 
-
-FUNCTION isDebugEnabled
-RETURN BOOLEAN;
-
-
-
+FUNCTION isDebugEnabled RETURN BOOLEAN;
 
 FUNCTION isInfoEnabled
 (
@@ -265,9 +587,7 @@ FUNCTION isInfoEnabled
 )
 RETURN BOOLEAN;
 
-
-FUNCTION isInfoEnabled
-RETURN BOOLEAN;
+FUNCTION isInfoEnabled RETURN BOOLEAN;
 
 
 
@@ -455,8 +775,32 @@ FUNCTION getLOG4PLSQVersion RETURN VARCHAR2;
 
 PROCEDURE purge
 (
-    pDateMax      IN DATE DEFAULT NULL
+    pDateMax      IN TIMESTAMP DEFAULT NULL
 );
+
+FUNCTION jsonEscape
+(
+    pString in TLOG.LTEXT%TYPE
+)
+return TLOG.LTEXT%TYPE;
+
+FUNCTION formatMessage
+(
+    pFORMAT     IN       TLOG.LTEXT%TYPE DEFAULT PLOGPARAM.DEFAULT_FORMAT      ,
+    pDATEFORMAT IN       TLOG.LTEXT%TYPE DEFAULT PLOGPARAM.DEFAULT_DATE_FORMAT ,
+    pSEPSTART   IN       VARCHAR2 DEFAULT PLOGPARAM.DEFAULT_FORMAT_SEP_START,
+    pSEPEND     IN       VARCHAR2 DEFAULT PLOGPARAM.DEFAULT_FORMAT_SEP_END,
+    pID         IN       TLOG.id%TYPE                      ,
+    pLDATE      IN       TLOG.ldate%TYPE                   ,
+    pLHSECS     IN       TLOG.lhsecs%TYPE                  ,
+    pLLEVEL     IN       TLOG.llevel%TYPE                  ,
+    pLSECTION   IN       TLOG.lsection%TYPE                ,
+    pLUSER      IN       TLOG.luser%TYPE                   ,
+    pLTEXT      IN       TLOG.LTEXT%TYPE                   ,
+    pLINSTANCE  IN       TLOG.LINSTANCE%TYPE DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
+    pLXML        IN       SYS.XMLTYPE DEFAULT NULL
+)
+return VARCHAR2;
 
 END;
 /

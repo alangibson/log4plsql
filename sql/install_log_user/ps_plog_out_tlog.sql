@@ -20,12 +20,14 @@ PROCEDURE log
     pLLEVEL     IN       TLOG.llevel%TYPE                  ,
     pLSECTION   IN       TLOG.lsection%TYPE                ,
     pLUSER      IN       TLOG.luser%TYPE                   ,
-    pLTEXT      IN       TLOG.LTEXT%TYPE
+    pLTEXT      IN       TLOG.LTEXT%TYPE                   ,
+    pLINSTANCE  IN       TLOG.LINSTANCE%TYPE DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
+    pLXML        IN       SYS.XMLTYPE DEFAULT NULL
 );
 
 PROCEDURE purge
 (
-  pDateMax      IN DATE DEFAULT NULL                                   
+  pDateMax      IN TIMESTAMP DEFAULT NULL                                   
 );
 
 END;
