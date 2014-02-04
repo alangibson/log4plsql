@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+ | This is the log4plsql Pages configuration file
+ |
+ | guillaume Moulard  6-may-2002 Creation
+ | guillaume Moulard  24-April-2002 adaptation for log4plsql2.2 
+ | guillaume Moulard  29-JAN-2003 adaptation for log4plsql3.1.1
+ |                                - Multi dbms_pipe
+ |                                - Multi user/database by backgroundProcess
+ | Bertrand Caradec  15-MAY-2008 pipename replaced by queue name
+ |                                                            
+ +-->
+
+<log4plsql>
+    <log4jParameterUseBybackgroundProcess>
+            <typeConfigurator confType="PropertyConfigurator" />
+            <fileName name="./properties/log4j.properties" />
+    </log4jParameterUseBybackgroundProcess>
+
+    <!-- 
+     |  Log4plsql start one java thread by source
+     +-->
+    <logSource name="logSource1">
+         <!-- log4j configuration part
+          |   see : http://jakarta.apache.org/log4j for general information
+          +-->
+        <log4j>
+             <!-- typeConfigurator reference to log4j Configurator type 
+              |   Currently possible is : DOMConfigurator, PropertyConfigurator, BasicConfigurator
+              +-->            
+            <typeConfigurator confType="PropertyConfigurator" />
+            <fileName name="./properties/log4j.properties" />
+        </log4j>
+        <database>
+            <source>
+                <connection>
+                   <!-- Database connection where log4plsql ase install.
+                    |   see : JDBC Developer's Guide and Reference / Verifying a JDBC Client Installation
+                    |         for all installation Oracle driver install
+                    +-->
+                  <username>pl</username>
+                  <password>pl</password>
+                   <!-- jdbc:oracle:thin:@<host_name>:<port_number>:<sid>  -->
+                  <dburl>jdbc:oracle:thin:@192.168.10.251:1521:orcl</dburl>
+                </connection>
+                   <!-- the default value of the queue is LOG_QUEUE_TOPIC
+                    +-->
+                <queuename>LOG_QUEUE</queuename>
+            </source>
+        </database>
+    </logSource>
+</log4plsql>
+

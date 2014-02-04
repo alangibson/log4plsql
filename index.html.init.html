@@ -1,0 +1,784 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 11">
+<meta name=Originator content="Microsoft Word 11">
+<link rel=File-List href="index-Dateien/filelist.xml">
+<link rel=Edit-Time-Data href="index-Dateien/editdata.mso">
+<!--[if !mso]>
+<style>
+v\:* {behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style>
+<![endif]-->
+<title>LOG4PLSQL : Oracle Database Logging tools</title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>bca</o:Author>
+  <o:Template>Normal</o:Template>
+  <o:LastAuthor>bca</o:LastAuthor>
+  <o:Revision>2</o:Revision>
+  <o:Created>2008-06-06T12:59:00Z</o:Created>
+  <o:LastSaved>2008-06-06T13:03:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>475</o:Words>
+  <o:Characters>2995</o:Characters>
+  <o:Company>syntegris GmbH</o:Company>
+  <o:Lines>24</o:Lines>
+  <o:Paragraphs>6</o:Paragraphs>
+  <o:CharactersWithSpaces>3464</o:CharactersWithSpaces>
+  <o:Version>11.6568</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:HyphenationZone>21</w:HyphenationZone>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
+ </w:LatentStyles>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;
+	mso-font-charset:2;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:0 268435456 0 0 -2147483648 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+h1
+	{mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	mso-outline-level:1;
+	font-size:24.0pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+h2
+	{mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	mso-outline-level:2;
+	font-size:18.0pt;
+	font-family:"Times New Roman";
+	font-weight:bold;}
+p.MsoBodyTextIndent, li.MsoBodyTextIndent, div.MsoBodyTextIndent
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:1.0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	tab-stops:35.4pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";
+	mso-ansi-language:EN-US;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+p
+	{mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+@page Section1
+	{size:595.3pt 841.9pt;
+	margin:70.85pt 70.85pt 2.0cm 70.85pt;
+	mso-header-margin:35.4pt;
+	mso-footer-margin:35.4pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:798259279;
+	mso-list-template-ids:-1693126656;}
+@list l0:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l1
+	{mso-list-id:855071114;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-1445582358 67895297 67895299 67895301 67895297 67895299 67895301 67895297 67895299 67895301;}
+@list l1:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:64.35pt;
+	mso-level-number-position:left;
+	margin-left:64.35pt;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l1:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:100.35pt;
+	mso-level-number-position:left;
+	margin-left:100.35pt;
+	text-indent:-18.0pt;
+	font-family:"Courier New";
+	mso-bidi-font-family:"Times New Roman";}
+@list l1:level3
+	{mso-level-tab-stop:108.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level4
+	{mso-level-tab-stop:144.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level5
+	{mso-level-tab-stop:180.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level6
+	{mso-level-tab-stop:216.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level7
+	{mso-level-tab-stop:252.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level8
+	{mso-level-tab-stop:288.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l1:level9
+	{mso-level-tab-stop:324.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;}
+@list l2
+	{mso-list-id:1592548407;
+	mso-list-template-ids:-921774568;}
+@list l2:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l2:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:72.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:"Courier New";
+	mso-bidi-font-family:"Times New Roman";}
+@list l3
+	{mso-list-id:1898971962;
+	mso-list-template-ids:-666235482;}
+@list l3:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l3:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:72.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:"Courier New";
+	mso-bidi-font-family:"Times New Roman";}
+@list l4
+	{mso-list-id:1964191878;
+	mso-list-template-ids:1889850880;}
+@list l4:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l5
+	{mso-list-id:2015915815;
+	mso-list-template-ids:249720938;}
+@list l5:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l6
+	{mso-list-id:2062434494;
+	mso-list-template-ids:351020872;}
+@list l6:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:36.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+@list l6:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:72.0pt;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	mso-ansi-font-size:10.0pt;
+	font-family:"Courier New";
+	mso-bidi-font-family:"Times New Roman";}
+ol
+	{margin-bottom:0cm;}
+ul
+	{margin-bottom:0cm;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Normale Tabelle";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]-->
+<meta name=revisit-after content="1 days">
+<meta name=classification content="database services">
+<meta name=rating content=General>
+<meta name=copyright content="(c) 2002-2003 by Guillaume Moulard">
+<meta name=author content="Guillaume Moulard">
+<meta name=Keywords
+content="log4j, log4plsql, oracle, loggin, tools, database, plsql, GNU, developpement, JMS, NTEventLog, transaction, Package, Procedure, Function, trigger">
+<meta name=description
+content="LOG4PLSQL is a plsql generic tools for log, trace and debug some message and variable in all plsql code (Oracle Package, Procedure, Function, Trigger, PL/SQL Web application).">
+<!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="2050"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+</head>
+
+<body bgcolor=silver lang=DE link=blue vlink=blue style='tab-interval:35.4pt'>
+
+<div class=Section1>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;mso-cellspacing:0cm;mso-padding-alt:3.75pt 3.75pt 3.75pt 3.75pt'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+  <td width="3%" style='width:3.0%;padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+  <p class=MsoNormal><o:p>&nbsp;</o:p></p>
+  </td>
+  <td width="92%" style='width:92.0%;padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+  <p class=MsoNormal><o:p>&nbsp;</o:p></p>
+  </td>
+  <td width="5%" style='width:5.0%;padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+  <p class=MsoNormal><o:p>&nbsp;</o:p></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:1'>
+  <td width="3%" style='width:3.0%;padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+  <p class=MsoNormal><o:p>&nbsp;</o:p></p>
+  </td>
+  <td width="92%" style='width:92.0%;background:#959595;padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+  <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+   style='width:100.0%;mso-cellspacing:0cm;mso-padding-alt:0cm 0cm 0cm 0cm'>
+   <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+    <td width="7%" style='width:7.0%;padding:0cm 0cm 0cm 0cm'>
+    <p class=MsoNormal><o:p>&nbsp;</o:p></p>
+    </td>
+    <td width="85%" style='width:85.0%;padding:0cm 0cm 0cm 0cm'>
+    <p>&nbsp;<o:p></o:p></p>
+    <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
+     width="100%" style='width:100.0%;mso-cellspacing:0cm;mso-padding-alt:0cm 0cm 0cm 0cm'>
+<!-- begin section -->
+     <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal>&nbsp;</p>
+      </td>
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal><o:p>&nbsp;</o:p></p>
+      </td>
+     </tr>
+     <tr style='mso-yfti-irow:1'>
+      <td width="100%" style='width:100.0%;background:silver;padding:0cm 0cm 0cm 0cm'>
+      <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
+       width="100%" style='width:100.0%;mso-cellspacing:0cm;mso-padding-alt:
+       0cm 0cm 0cm 0cm'>
+       <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+        <td width="95%" nowrap style='width:95.0%;padding:0cm 0cm 0cm 0cm'>
+        <h1><span lang=EN-GB style='mso-ansi-language:EN-GB'>Log 4 pl/sql<o:p></o:p></span></h1>
+        <h2><span lang=EN-GB style='mso-ansi-language:EN-GB'>Oracle Database
+        Logging tools<o:p></o:p></span></h2>
+        </td>
+        <td width="5%" style='width:5.0%;padding:0cm 0cm 0cm 0cm'>
+        <p class=MsoNormal><a href="http://log4plsql.sourceforge.net/"
+        alt="LOG4PLSQ LOGO"><span style='text-decoration:none;text-underline:
+        none'><img border=0 width=32 height=32 id="_x0000_i1025"
+        src="docs/logo.gif"></span></a></p>
+        </td>
+       </tr>
+      </table>
+      <p class=MsoNormal><o:p></o:p></p>
+      </td>
+<!-- end section --><!-- begin section -->
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal><span style='font-size:10.0pt'><o:p>&nbsp;</o:p></span></p>
+      </td>
+     </tr>
+     <tr style='mso-yfti-irow:2'>
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal>&nbsp; </p>
+      </td>
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal><span style='font-size:10.0pt'><o:p>&nbsp;</o:p></span></p>
+      </td>
+     </tr>
+     <tr style='mso-yfti-irow:3'>
+      <td style='background:silver;padding:0cm 0cm 0cm 0cm'>
+      <h2><a name="General_information">General information</a></h2>
+      <table class=MsoNormalTable border=0 cellpadding=0 width="100%"
+       style='width:100.0%;mso-cellspacing:1.5pt'>
+       <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+        <td width="99%" valign=top style='width:99.0%;padding:.75pt .75pt .75pt .75pt'>
+        <p><span lang=EN-GB style='mso-ansi-language:EN-GB'>LOG4PLSQL is a
+        PLSQL framework for logging in all PL/SQL code <o:p></o:p></span></p>
+        <ul type=disc>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l4 level1 lfo1;tab-stops:list 36.0pt'>Package,</li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l4 level1 lfo1;tab-stops:list 36.0pt'>Procedure,</li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l4 level1 lfo1;tab-stops:list 36.0pt'>Function,</li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l4 level1 lfo1;tab-stops:list 36.0pt'>Trigger,</li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l4 level1 lfo1;tab-stops:list 36.0pt'>PL/SQL Web
+             application,</li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l4 level1 lfo1;tab-stops:list 36.0pt'>Oracle Tools
+             (Form, report,…).</li>
+        </ul>
+        <p>Purpose:</p>
+        <ul type=disc>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l0 level1 lfo2;tab-stops:list 36.0pt'>Easy
+             implementation and use</li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l0 level1 lfo2;tab-stops:list 36.0pt'><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'>Possibility to log
+             apart from transaction<o:p></o:p></span></li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l0 level1 lfo2;tab-stops:list 36.0pt'><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'>Possibility to adapt
+             the level of logging depending on user requirements<o:p></o:p></span></li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l0 level1 lfo2;tab-stops:list 36.0pt'><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'>Ability to use all
+             LOG4J feature.<o:p></o:p></span></li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l0 level1 lfo2;tab-stops:list 36.0pt'><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'>Provide a complet set
+             of tools PL/SQL developpement (bebug variable, SQLERRM, assert,
+             call stack, ... ).<o:p></o:p></span></li>
+        </ul>
+        <p class=MsoBodyTextIndent style='margin-left:0cm'><span lang=EN-US>Log
+        destination:</span></p>
+        <ul style='margin-top:0cm' type=disc>
+         <li class=MsoNormal style='mso-list:l2 level1 lfo3;tab-stops:list 36.0pt'><span
+             lang=EN-US style='mso-ansi-language:EN-US'>table TLOG <o:p></o:p></span></li>
+         <li class=MsoNormal style='mso-list:l2 level1 lfo3;tab-stops:list 36.0pt'><span
+             lang=EN-US style='mso-ansi-language:EN-US'>alert.log file <o:p></o:p></span></li>
+         <li class=MsoNormal style='mso-list:l2 level1 lfo3;tab-stops:list 36.0pt'><span
+             lang=EN-US style='mso-ansi-language:EN-US'>trace file <o:p></o:p></span></li>
+         <li class=MsoNormal style='mso-list:l2 level1 lfo3;tab-stops:list 36.0pt'><span
+             lang=EN-US style='mso-ansi-language:EN-US'>standard output <o:p></o:p></span></li>
+         <li class=MsoNormal style='mso-list:l2 level1 lfo3;tab-stops:list 36.0pt'><span
+             lang=EN-US style='mso-ansi-language:EN-US'>session information
+             (view V$SESSION)<o:p></o:p></span></li>
+         <li class=MsoNormal style='mso-list:l2 level1 lfo3;tab-stops:list 36.0pt'><span
+             lang=EN-US style='mso-ansi-language:EN-US'>advanced queue read by
+             Log4JBackgroundProcess. : <o:p></o:p></span></li>
+         <ul style='margin-top:0cm' type=circle>
+          <li class=MsoNormal style='mso-list:l2 level2 lfo3;tab-stops:list 72.0pt'><span
+              lang=EN-US style='mso-ansi-language:EN-US'>Async, <o:p></o:p></span></li>
+          <li class=MsoNormal style='mso-list:l2 level2 lfo3;tab-stops:list 72.0pt'><span
+              lang=EN-US style='mso-ansi-language:EN-US'>JDBC, <o:p></o:p></span></li>
+          <li class=MsoNormal style='mso-list:l2 level2 lfo3;tab-stops:list 72.0pt'><span
+              lang=EN-US style='mso-ansi-language:EN-US'>JMS, <o:p></o:p></span></li>
+          <li class=MsoNormal style='mso-list:l2 level2 lfo3;tab-stops:list 72.0pt'><span
+              lang=EN-US style='mso-ansi-language:EN-US'>NTEventLog, <o:p></o:p></span></li>
+          <li class=MsoNormal style='mso-list:l2 level2 lfo3;tab-stops:list 72.0pt'><span
+              lang=EN-US style='mso-ansi-language:EN-US'>SMTP, <o:p></o:p></span></li>
+          <li class=MsoNormal style='mso-list:l2 level2 lfo3;tab-stops:list 72.0pt'><span
+              lang=EN-US style='mso-ansi-language:EN-US'>Socket, <o:p></o:p></span></li>
+          <li class=MsoNormal style='mso-list:l2 level2 lfo3;tab-stops:list 72.0pt'>SocketHub,
+              </li>
+          <li class=MsoNormal style='mso-list:l2 level2 lfo3;tab-stops:list 72.0pt'>Syslog,
+              </li>
+          <li class=MsoNormal style='mso-list:l2 level2 lfo3;tab-stops:list 72.0pt'>Telnet,
+              </li>
+          <li class=MsoNormal style='mso-list:l2 level2 lfo3;tab-stops:list 72.0pt'><span
+              lang=EN-US style='mso-ansi-language:EN-US'>Writer <o:p></o:p></span></li>
+         </ul>
+        </ul>
+        <p style='margin-left:72.0pt;text-indent:-18.0pt;mso-list:l2 level2 lfo3;
+        tab-stops:list 72.0pt'><![if !supportLists]><span style='font-size:
+        10.0pt;mso-bidi-font-size:12.0pt;font-family:"Courier New";mso-fareast-font-family:
+        "Courier New"'><span style='mso-list:Ignore'>o<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </span></span></span><![endif]><o:p>&nbsp;</o:p></p>
+        <p><span lang=EN-GB style='mso-ansi-language:EN-GB'>Log4plsql was born
+        from the </span><a href="http://jakarta.apache.org/log4j"><span
+        lang=EN-GB style='mso-ansi-language:EN-GB'>log4J</span></a><span
+        lang=EN-GB style='mso-ansi-language:EN-GB'> spirit (and use it).<o:p></o:p></span></p>
+        </td>
+       </tr>
+       <tr style='mso-yfti-irow:1;mso-yfti-lastrow:yes'>
+        <td width="99%" valign=top style='width:99.0%;padding:.75pt .75pt .75pt .75pt'>
+        <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'><o:p>&nbsp;</o:p></span></p>
+        </td>
+       </tr>
+      </table>
+      <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'><o:p></o:p></span></p>
+      </td>
+<!-- end section --><!-- begin section -->
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal><span lang=EN-GB style='font-size:10.0pt;mso-ansi-language:
+      EN-GB'><o:p>&nbsp;</o:p></span></p>
+      </td>
+     </tr>
+     <tr style='mso-yfti-irow:4'>
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>&nbsp;
+      <o:p></o:p></span></p>
+      </td>
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal><span lang=EN-GB style='font-size:10.0pt;mso-ansi-language:
+      EN-GB'><o:p>&nbsp;</o:p></span></p>
+      </td>
+     </tr>
+     <tr style='mso-yfti-irow:5'>
+      <td style='background:silver;padding:0cm 0cm 0cm 0cm'>
+      <h2><a name=Documentations>Documentation</a></h2>
+      <table class=MsoNormalTable border=0 cellpadding=0 width="100%"
+       style='width:100.0%;mso-cellspacing:1.5pt'>
+       <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+        <td width="99%" valign=top style='width:99.0%;padding:.75pt .75pt .75pt .75pt'>
+        <ul type=disc>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l3 level1 lfo4;tab-stops:list 36.0pt'><a
+             href="docs/UserGuide.html">LOG4PLSQL: User Guide</a></li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l3 level1 lfo4;tab-stops:list 36.0pt'><a
+             href="docs/api/index.html">Java Doc</a></li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l3 level1 lfo4;tab-stops:list 36.0pt'><a
+             href="docs/sql/index.html">pl/sql package 'java'doc</a> </li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l3 level1 lfo4;tab-stops:list 36.0pt'><a
+             href="license.txt">License</a></li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l3 level1 lfo4;tab-stops:list 36.0pt'><a
+             href="http://logging.apache.org/log4j/docs/documentation.html">log4j
+             documentation</a></li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l3 level1 lfo4;tab-stops:list 36.0pt'><a
+             href="http://www.oracle.com">Oracle</a> (<a
+             href="http://docs.oracle.com">doc</a>)</li>
+        </ul>
+        </td>
+       </tr>
+<!-- end section --><!-- begin section -->
+      </table>
+      <p class=MsoNormal><o:p></o:p></p>
+      </td>
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal><span style='font-size:10.0pt'><o:p>&nbsp;</o:p></span></p>
+      </td>
+     </tr>
+     <tr style='mso-yfti-irow:6'>
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal>&nbsp; </p>
+      </td>
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal><span style='font-size:10.0pt'><o:p>&nbsp;</o:p></span></p>
+      </td>
+     </tr>
+     <tr style='mso-yfti-irow:7'>
+      <td style='background:silver;padding:0cm 0cm 0cm 0cm'>
+      <h2>Download</h2>
+      <table class=MsoNormalTable border=0 cellpadding=0 width="100%"
+       style='width:100.0%;mso-cellspacing:1.5pt'>
+       <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+        <td width="99%" valign=top style='width:99.0%;padding:.75pt .75pt .75pt .75pt'>
+        <ul type=disc>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l5 level1 lfo5;tab-stops:list 36.0pt'><a
+             href="http://prdownloads.sourceforge.net/log4plsql/Log4plsql.zip">LOG4PLSQL</a></li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l5 level1 lfo5;tab-stops:list 36.0pt'><a
+             href="http://log4plsql.sourceforge.net/externalProjectLib"><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'>required lib</span></a><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'> (Only for V2 and
+             Log4JbackgroundProcess)<o:p></o:p></span></li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l5 level1 lfo5;tab-stops:list 36.0pt'><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'>Tora Integration: </span><a
+             href="http://www.globecom.se/tora"><span lang=EN-GB
+             style='mso-ansi-language:EN-GB'>TOra</span></a><span lang=EN-GB
+             style='mso-ansi-language:EN-GB'> is a Toolkit for Oracle which
+             aims to help the DBA or developer of database application. Features
+             PL/SQL debugger, SQL worksheet with syntax highlighting, DB
+             browser and a comprehensive set of DBA tools. </span>For using
+             LOG4PLSQL with TOra download <a href="download/log4plsql.tpl">log4plsql.tpl</a></li>
+        </ul>
+        </td>
+       </tr>
+<!-- end section --><!-- begin section -->
+      </table>
+      <p class=MsoNormal><o:p></o:p></p>
+      </td>
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal><span style='font-size:10.0pt'><o:p>&nbsp;</o:p></span></p>
+      </td>
+     </tr>
+     <tr style='mso-yfti-irow:8'>
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal>&nbsp; </p>
+      </td>
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal><span style='font-size:10.0pt'><o:p>&nbsp;</o:p></span></p>
+      </td>
+     </tr>
+     <tr style='mso-yfti-irow:9'>
+      <td style='background:silver;padding:0cm 0cm 0cm 0cm'>
+      <h2>Contact us</h2>
+      <table class=MsoNormalTable border=0 cellpadding=0 width="100%"
+       style='width:100.0%;mso-cellspacing:1.5pt'>
+       <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+        <td width="99%" valign=top style='width:99.0%;padding:.75pt .75pt .75pt .75pt'>
+        <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>To
+        talk about log4plsql use log4plsql-all-info mailing list <o:p></o:p></span></p>
+        <ul type=disc>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l6 level1 lfo6;tab-stops:list 36.0pt'><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'>To post a message to
+             all the list members, send email to <br>
+             </span><a href="mailto:log4plsql-all-info@lists.sourceforge.net"><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'>log4plsql-all-info@lists.sourceforge.net</span></a><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'><o:p></o:p></span></li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l6 level1 lfo6;tab-stops:list 36.0pt'><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'>Archives: </span><a
+             href="http://sourceforge.net/mailarchive/forum.php?forum=log4plsql-all-info"><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'>log4plsql-all-info (SF
+             Mail Archive)</span></a><span lang=EN-GB style='mso-ansi-language:
+             EN-GB'> or </span><a
+             href="http://www.mail-archive.com/log4plsql-all-info@lists.sourceforge.net/"><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'>(mail-archive)</span></a><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'><o:p></o:p></span></li>
+         <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:
+             auto;mso-list:l6 level1 lfo6;tab-stops:list 36.0pt'><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'>See </span><a
+             href="http://lists.sourceforge.net/mailman/listinfo/log4plsql-all-info"><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'>MailMan</span></a><span
+             lang=EN-GB style='mso-ansi-language:EN-GB'> to Subscribe,
+             Unsubscribe and Preferences.<o:p></o:p></span></li>
+        </ul>
+        <p><span lang=EN-GB style='mso-ansi-language:EN-GB'>&nbsp;<o:p></o:p></span></p>
+        </td>
+       </tr>
+<!-- end section --><!-- begin section -->
+      </table>
+      <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'><o:p></o:p></span></p>
+      </td>
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal><span lang=EN-GB style='font-size:10.0pt;mso-ansi-language:
+      EN-GB'><o:p>&nbsp;</o:p></span></p>
+      </td>
+     </tr>
+     <tr style='mso-yfti-irow:10'>
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'>&nbsp;
+      <o:p></o:p></span></p>
+      </td>
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal><span lang=EN-GB style='font-size:10.0pt;mso-ansi-language:
+      EN-GB'><o:p>&nbsp;</o:p></span></p>
+      </td>
+     </tr>
+     <tr style='mso-yfti-irow:11;mso-yfti-lastrow:yes'>
+      <td style='background:silver;padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal align=center style='text-align:center'><span
+      lang=EN-GB style='mso-ansi-language:EN-GB'>[</span><a
+      href="http://sourceforge.net/project/showfiles.php?group_id=51533"><span
+      lang=EN-GB style='mso-ansi-language:EN-GB'>download log4plsql</span></a><span
+      lang=EN-GB style='mso-ansi-language:EN-GB'>] [</span><a
+      href="http://log4plsql.sourceforge.net/externalProjectLib"><span
+      lang=EN-GB style='mso-ansi-language:EN-GB'>download required lib</span></a><span
+      lang=EN-GB style='mso-ansi-language:EN-GB'>] [</span><a
+      href="http://sourceforge.net/projects/log4plsql"><span lang=EN-GB
+      style='mso-ansi-language:EN-GB'>SourceForge projet</span></a><span
+      lang=EN-GB style='mso-ansi-language:EN-GB'>] [</span><a
+      href="http://logging.apache.org"><span lang=EN-GB style='mso-ansi-language:
+      EN-GB'>Logging Services Project @ Apache</span></a><span lang=EN-GB
+      style='mso-ansi-language:EN-GB'>] [</span><a
+      href="http://log4plsql.sourceforge.net/html/log4plsqReferencedBy.html"><span
+      lang=EN-GB style='mso-ansi-language:EN-GB'>who speaks about log4plsql</span></a><span
+      lang=EN-GB style='mso-ansi-language:EN-GB'>]<o:p></o:p></span></p>
+      </td>
+<!-- end section -->
+      <td style='padding:0cm 0cm 0cm 0cm'>
+      <p class=MsoNormal><span lang=EN-GB style='font-size:10.0pt;mso-ansi-language:
+      EN-GB'><o:p>&nbsp;</o:p></span></p>
+      </td>
+     </tr>
+    </table>
+    <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'><o:p></o:p></span></p>
+    </td>
+    <td width="8%" style='width:8.0%;padding:0cm 0cm 0cm 0cm'>
+    <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'><o:p>&nbsp;</o:p></span></p>
+    </td>
+   </tr>
+  </table>
+  <p><span lang=EN-GB style='mso-ansi-language:EN-GB'>&nbsp;<o:p></o:p></span></p>
+  <p><span lang=EN-GB style='mso-ansi-language:EN-GB'>&nbsp;<o:p></o:p></span></p>
+  </td>
+  <td width="5%" style='width:5.0%;padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'><o:p>&nbsp;</o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:2'>
+  <td width="3%" style='width:3.0%;padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'><o:p>&nbsp;</o:p></span></p>
+  </td>
+  <td width="92%" style='width:92.0%;padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'><o:p>&nbsp;</o:p></span></p>
+  </td>
+  <td width="5%" style='width:5.0%;padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'><o:p>&nbsp;</o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:3;mso-yfti-lastrow:yes'>
+  <td width="3%" style='width:3.0%;padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+  <p class=MsoNormal><span lang=EN-GB style='mso-ansi-language:EN-GB'><o:p>&nbsp;</o:p></span></p>
+  </td>
+  <td width="92%" style='width:92.0%;padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+  <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+   style='width:100.0%;mso-cellspacing:0cm;mso-padding-alt:0cm 0cm 0cm 0cm'>
+   <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes'>
+    <td style='padding:0cm 0cm 0cm 0cm'>
+    <p class=MsoNormal><a href="http://logging.apache.org"><span
+    style='text-decoration:none;text-underline:none'><img border=0 width=387
+    height=91 id="_x0000_i1026"
+    src="http://logging.apache.org/images/ls-logo.jpg"
+    alt="Logging Services project"></span></a><a
+    href="http://logging.apache.org/log4j"><span style='text-decoration:none;
+    text-underline:none'><img border=0 width=207 height=139 id="_x0000_i1027"
+    src="http://logging.apache.org/log4j/docs/images/logo.jpg"
+    alt="The log4j project"></span></a></p>
+    </td>
+    <td style='padding:0cm 0cm 0cm 0cm'>
+    <p class=MsoNormal><a href="http://sourceforge.net"></a><!--[if gte vml 1]><v:shapetype
+     id="_x0000_t75" coordsize="21600,21600" o:spt="75" o:preferrelative="t"
+     path="m@4@5l@4@11@9@11@9@5xe" filled="f" stroked="f">
+     <v:stroke joinstyle="miter"/>
+     <v:formulas>
+      <v:f eqn="if lineDrawn pixelLineWidth 0"/>
+      <v:f eqn="sum @0 1 0"/>
+      <v:f eqn="sum 0 0 @1"/>
+      <v:f eqn="prod @2 1 2"/>
+      <v:f eqn="prod @3 21600 pixelWidth"/>
+      <v:f eqn="prod @3 21600 pixelHeight"/>
+      <v:f eqn="sum @0 0 1"/>
+      <v:f eqn="prod @6 1 2"/>
+      <v:f eqn="prod @7 21600 pixelWidth"/>
+      <v:f eqn="sum @8 21600 0"/>
+      <v:f eqn="prod @7 21600 pixelHeight"/>
+      <v:f eqn="sum @10 21600 0"/>
+     </v:formulas>
+     <v:path o:extrusionok="f" gradientshapeok="t" o:connecttype="rect"/>
+     <o:lock v:ext="edit" aspectratio="t"/>
+    </v:shapetype><v:shape id="_x0000_s1026" type="#_x0000_t75" alt="SourceForge Logo"
+     href="http://sourceforge.net/" style='position:absolute;margin-left:117.5pt;
+     margin-top:0;width:157.5pt;height:46.5pt;z-index:1;
+     mso-wrap-distance-left:0;mso-wrap-distance-right:0;
+     mso-position-horizontal:right;mso-position-horizontal-relative:text;
+     mso-position-vertical-relative:line' o:allowoverlap="f" o:button="t">
+     <v:imagedata src="http://sourceforge.net/sflogo.php?group_id=51533&amp;type=5"/>
+     <w:wrap type="square"/>
+    </v:shape><![endif]--><![if !vml]><a href="http://sourceforge.net/"><img
+    border=0 width=210 height=62
+    src="http://sourceforge.net/sflogo.php?group_id=51533&amp;type=5"
+    align=right alt="SourceForge Logo" v:shapes="_x0000_s1026"></a><![endif]><span
+    style='mso-no-proof:yes'><a href="http://sourceforge.net"></a></span></p>
+    </td>
+   </tr>
+  </table>
+  <p class=MsoNormal><o:p></o:p></p>
+  </td>
+  <td width="5%" style='width:5.0%;padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+  <p class=MsoNormal><o:p>&nbsp;</o:p></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal>&nbsp; </p>
+
+</div>
+
+</body>
+
+</html>

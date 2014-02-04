@@ -1,0 +1,23 @@
+<collection> 
+	<description>Quelques recette pour le cours XML</description> 
+	<recipe> 
+		<title>riz</title>
+		<ingredient name="riz" amount="1" unit="Kg"/>
+		<preparation> 
+			<step>faire chauffer de l'eau </step> 
+			<step>Mettre du sel</step> 
+			<step>Attendre qu'il n'y ai plus d'eau</step>
+		</preparation>
+		<comment>Avec un peu de beurre c'est encore meilleur</comment> 
+		<nutrition calories="1167" fat="23" carbohydrates="45" protein="32"/> 
+	</recipe>
+	<recipe> 
+		<title>Beef Parmesan with Garlic Angel Hair Pasta</title>
+		<ingredient name="beef cube steak" amount="1.5" unit="pound"/>
+		<preparation> 
+			<step> Preheat oven to 350 degrees F (175 degrees C). </step> 
+		</preparation>
+		<comment> Make the meat ahead of time, and refrigerate over night, the acid in the tomato sauce will tenderize the meat even more. If you do this, save the mozzarella till the last minute. </comment> 
+		<nutrition calories="1167" fat="23" carbohydrates="45" protein="32"/> 
+	</recipe>
+</collection>

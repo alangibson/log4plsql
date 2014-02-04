@@ -1,0 +1,233 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<meta name="revisit-after" content="1 days">
+<meta name="classification" content="database services">
+<meta name="rating" content="General">
+<meta name="copyright" content="(c) 2002-2003 by Guillaume Moulard">
+<meta name="author" content="Guillaume Moulard">
+<meta name="Keywords" content="log4j, log4plsql, oracle, loggin, tools, database, plsql, GNU, developpement, JMS, NTEventLog, transaction, Package, Procedure, Function, trigger">
+<meta name="description" content="LOG4PLSQL is a plsql generic tools for log, trace and debug some message and variable in all plsql code (Oracle Package, Procedure, Function, Trigger, PL/SQL Web application).">
+<title>LOG4PLSQL : Oracle Database Logging tools</title>
+</head>
+
+<body bgcolor="#C0C0C0">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="5">
+    <tr>
+        <td width="3%">
+            <p align="center">
+        <td width="92%"></td>
+        <td width="5%"></td>
+    </tr>
+    <tr>
+        <td width="3%"></td>
+        <td width="92%" bordercolor="#959595" bgcolor="#959595">
+            <table border="0" width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td width="7%"></td>
+                    <td width="85%">
+                        <p>&nbsp;</p>
+                        <table border="0" cellspacing="0" cellpadding="0" width="100%">
+                            <!-- begin section --> 
+                            <tr>
+                                <td>&nbsp;<td>
+                            </tr>
+                            <tr>
+                                <td bgcolor="#C0C0C0" width="100%">
+                                    <table border="0" width="100%" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td width="95%" NOWRAP>
+                                                <h1>Log 4 pl/sql</h1>
+                                                <h2>Oracle Database Logging tools</h2>
+                                            </td>
+                                            <td width="5%">
+                                                <a href="http://log4plsql.sourceforge.net/" alt="LOG4PLSQ LOGO">
+                                                    <img border="0" src="docs/logo.gif">
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <!-- end section -->                            
+                            <!-- begin section -->                            
+                            <tr>
+                                <td>&nbsp;
+                            </tr>
+                            <tr>
+                                <td bgcolor="#C0C0C0">
+                                    <h2><a name="General information">General
+                                    information</a></h2>
+                                    <table width="100%" border="0">
+                                        <tr>
+                                            <td width="99%" valign="top">
+                                                <p>LOG4PLSQL is a PLSQL framework for logging in all PLSQL code
+                                                <ul>
+                                                    <li>Package,</li>
+                                                    <li>Procedure,</li>
+                                                    <li>Function,</li>
+                                                    <li>Trigger,</li>
+                                                    <li>PL/SQL Web application,</li>
+                                                    <li>Oracle Tools (Form, report,…).</li>
+                                                </ul>
+                                                <p>Purpose:</p>
+                                                <ul>
+                                                    <li>Easy of implemented and use</li>
+                                                    <li>Possibility to log apart from transaction</li>
+                                                    <li>Possibility to adapt the level of logging depending on user requirements</li>
+                                                    <li>Ability to use all LOG4J feature.</li>
+                                                    <li>Provide a complet set of tools PL/SQL developpement (bebug variable, SQLERRM, assert, call stack, ... ).</LI>
+                                                </ul>
+                                                <p>Log destination:</p>
+                                                <ul>
+                                                    <li>Table in Oracle Datablase</li>
+                                                    <li>Oracle Datablase alert.log file</li>
+                                                    <li>Oracle Datablase trace file</li>
+                                                    <li>Standard output</li>
+                                                    <li>session information (view V$SESSION)</li>
+                                                    <li>By log4J::Log4JbackgroundProcess:
+                                                        <ul>
+                                                            <li>
+                                                                <p>Async,</li>
+                                                            <li>
+                                                                <p>JDBC,</li>
+                                                            <li>
+                                                                <p>JMS,</li>
+                                                            <li>
+                                                                <p>NTEventLog,</li>
+                                                            <li>
+                                                                <p>SMTP,</li>
+                                                            <li>
+                                                                <p>Socket,</li>
+                                                            <li>
+                                                                <p>SocketHub,</li>
+                                                            <li>
+                                                                <p>Syslog,</li>
+                                                            <li>
+                                                                <p>Telnet,</li>
+                                                            <li>
+                                                                <p>Writer</li>
+                                                        </ul>
+                                                </ul>
+                                                <p>Log4plsql was born from the <a href="http://jakarta.apache.org/log4j">log4J</a>
+                                                spirit (and use it).</td>
+                                        </tr>
+                                        <tr>
+                                            <td width="99%" valign="top"></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <!-- end section -->                            
+                            <!-- begin section -->                            
+                            <tr>
+                                <td>&nbsp;
+                            </tr>
+                            <tr>
+                                <td bgcolor="#C0C0C0">
+                                    <h2><a name="Documentations">Documentations</a></h2>
+                                    <table width="100%" border="0">
+                                        <tr>
+                                            <td width="99%" valign="top">
+                                                <ul>
+                                                    <li><a href="docs/UserGuide.html">LOG4PLSQL: User Guide</a></li>
+                                                    <li><a href="license.txt">License</a></li>
+                                                    <li><a href="http://logging.apache.org/log4j/docs/documentation.html">log4j documentation</a></li>
+                                                    <li><a href="http://www.oracle.com">Oracle</a> (<a href="http://docs.oracle.com">doc</a>)</li>                                                    
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <!-- end section -->
+                            <!-- begin section -->                            
+                            <tr>
+                                <td>&nbsp;
+                            </tr>
+                            <tr>
+                                <td bgcolor="#C0C0C0">
+                                    <h2><a name="Download">Download</a></h2>
+                                    <table width="100%" border="0">
+                                        <tr>
+                                            <td width="99%" valign="top">
+                                                <ul>
+                                                    <li><a href="http://prdownloads.sourceforge.net/log4plsql/Log4plsql.zip">LOG4PLSQL</a></li>
+                                                    <li><a href="http://log4plsql.sourceforge.net/externalProjectLib">required lib</a> (Only for V2 and Log4JbackgroundProcess)</li>
+                                                    <li>Tora Integration: <a href="http://sourceforge.net/projects/tora/">TOra</a> is a Toolkit for Oracle which aims to help the DBA or developer of database application. Features PL/SQL debugger, SQL worksheet with syntax highlighting, DB browser and a comprehensive set of DBA tools. For
+                                                      using LOG4PLSQL with TOra
+                                                      download <a href="download/log4plsql.tpl">log4plsql.tpl</a></li>
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <!-- end section -->
+
+
+
+                            <!-- begin section -->                            
+                            <tr>
+                                <td>&nbsp;
+                            </tr>
+                            <tr>
+                                <td bgcolor="#C0C0C0"><center>[<a href="http://sourceforge.net/project/showfiles.php?group_id=51533">download
+                                    log4plsql</a>] [<a href="http://log4plsql.sourceforge.net/externalProjectLib">download
+                                    required lib</a>] [<a href="http://sourceforge.net/projects/log4plsql">SourceForge
+                                    projet</a>] [<a href="http://logging.apache.org">Logging Services Project @ Apache</a>]
+                                    [<a href="http://log4plsql.sourceforge.net/html/log4plsqReferencedBy.html">who
+                                    speaks about log4plsql</a>]</center></td>
+                            </tr>
+                            <!-- end section -->                            
+  
+   
+   
+                        </table>
+                    </td>
+                    <td width="8%"></td>
+                </tr>
+            </table>
+            <p>&nbsp;</p>
+            <p>&nbsp;</td>
+        <td width="5%"></td>
+    </tr>
+    <tr>
+        <td width="3%"></td>
+        <td width="92%"></td>
+        <td width="5%"></td>
+    </tr>
+    <tr>
+        <td width="3%"></td>
+        <td width="92%">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                    <td >
+                      <a href="http://logging.apache.org"><img src="http://logging.apache.org/images/ls-logo.jpg" alt="Logging Services project" border="0" ></a>
+                      <a href="http://logging.apache.org/log4j"><img src="http://logging.apache.org/log4j/docs/images/logo.jpg" alt="The log4j project" border="0" width="207" height="139"></a>
+                    </td>
+                    <td ><a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=51533&amp;type=5" border="0" alt="SourceForge Logo" align="right"></a></TD>
+                </tr>
+            </table>
+        </td>
+        <td width="5%"></td>
+    </tr>
+</table>
+&nbsp;
+
+</body>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-3586755-6");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script>
+
+
+</html>
