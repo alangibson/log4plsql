@@ -6,13 +6,15 @@ PLOG
        features        
 */
 
-exec PLOG.PURGE;
+begin PLOG.PURGE; end;
+/
 
 SET SERVEROUTPUT ON SIZE 1000000 
 set linesize 2000
 
 --default context
-exec PLOG.debug ('stdout SQLPLUS');
+begin PLOG.debug ('stdout SQLPLUS'); end;
+/
 
 declare
     pCTX       PLOGPARAM.LOG_CTX := PLOG.INIT (pDBMS_OUTPUT => TRUE , pLEVEL       => PLOG.LDEBUG) ;
