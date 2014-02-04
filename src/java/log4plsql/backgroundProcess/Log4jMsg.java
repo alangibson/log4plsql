@@ -52,8 +52,14 @@ public class Log4jMsg {
 	        Category logger = Logger.getLogger(datalog.getLuser()+ "." +datalog.getLsection());
 	        
 	        // convert the PL/SQL log level in LOG4J level
-	        Level level = (DynamicLevel)htLevels.get(new Integer (datalog.getLlevel().intValue()));
-	
+	        // Level level = (DynamicLevel)htLevels.get(new Integer (datalog.getLlevel().intValue()));
+	        // Alan Gibson changed conversion from casting to creating new Level
+	        // A DynamicLevel was being sent to server when using SocketAppender
+	        // constructor: Level(int level, String levelStr, int syslogEquivalent)
+	        DynamicLevel dynLevel = (DynamicLevel) htLevels.get(new Integer (datalog.getLlevel().intValue()));
+	        // Level level = new Level(dynLevel.dynamicLevelInt, dynLevel.dynamicLevelStr, dynLevel.dynamicLevelSyslogEquiv);
+	        Level level = Level.toLevel(dynLevel.dynamicLevelInt);
+	        
 	        if (level != null) {
 	           priority = level;
 	        } else {
