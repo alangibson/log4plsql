@@ -22,7 +22,8 @@ PACKAGE BODY PLOG_OUT_DBMS_OUTPUT AS
     pLUSER      IN       TLOG.luser%TYPE                   ,
     pLTEXT      IN       TLOG.LTEXT%TYPE                   ,
     pLINSTANCE  IN       TLOG.LINSTANCE%TYPE DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
-    pLXML        IN       SYS.XMLTYPE DEFAULT NULL
+    pLSID       IN       TLOG.LSID%TYPE                    ,
+    pLXML       IN       SYS.XMLTYPE DEFAULT NULL
 )
 --*******************************************************************************
 --   NAME:   log
@@ -58,7 +59,7 @@ AS
              LTRIM(TO_CHAR(MOD(pLHSECS,100),'09'))||'-' ||
              PLOGPARAM.getLevelInText(pLLEVEL)||'-'||
              pLSECTION||'-'||
-             pLINSTANCE||'  ';
+             pLINSTANCE||'('||pLSID||')  ';
 
       hdr_len := LENGTH(hdr);
       line_len := wrap - hdr_len;

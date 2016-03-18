@@ -258,6 +258,7 @@ function formatMessage
     pLUSER      IN       TLOG.luser%TYPE                                        ,
     pLTEXT      IN       TLOG.LTEXT%TYPE                                        ,
     pLINSTANCE  IN       TLOG.LINSTANCE%TYPE DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
+    pSID        IN       TLOG.LSID%TYPE                                         ,
     pLXML       IN       SYS.XMLTYPE DEFAULT NULL
 )
 return VARCHAR2
@@ -274,6 +275,7 @@ begin
     buffer := replace(buffer, '%(user)', pLUSER );
     buffer := replace(buffer, '%(text)', pLTEXT );
     buffer := replace(buffer, '%(instance)', pLINSTANCE );
+    buffer := replace(buffer, '%(sid)', pLSID );
     buffer := replace(buffer, '%(seps)', pSEPSTART);
     buffer := replace(buffer, '%(sepe)', pSEPEND);
     return buffer;

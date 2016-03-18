@@ -22,7 +22,8 @@ PROCEDURE log
     pLUSER      IN       TLOG.luser%TYPE                   ,
     pLTEXT      IN       TLOG.LTEXT%TYPE                   ,
     pLINSTANCE  IN       TLOG.LINSTANCE%TYPE DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
-    pLXML        IN       SYS.XMLTYPE DEFAULT NULL
+    pLSID       IN       TLOG.LSID%TYPE                    ,
+    pLXML       IN       SYS.XMLTYPE DEFAULT NULL
 );
 
 PROCEDURE dequeue_one_msg
@@ -34,7 +35,8 @@ PROCEDURE dequeue_one_msg
     pLSECTION   OUT       TLOG.lsection%TYPE                ,
     pLUSER      OUT       TLOG.luser%TYPE                   ,
     pLTEXT      OUT       TLOG.LTEXT%TYPE                   ,
-    pLINSTANCE  OUT       TLOG.LINSTANCE%TYPE
+    pLINSTANCE  OUT       TLOG.LINSTANCE%TYPE               ,
+    pLSID       OUT       TLOG.LSID%TYPE
 );
 
 PROCEDURE purge(pMaxDate IN TIMESTAMP DEFAULT NULL);

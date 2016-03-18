@@ -78,7 +78,7 @@ DEFAULT_DBMS_OUTPUT_LINE_WRAP   NUMBER := 100;
 
 -- Default message formatting string
 -- Maintains backwards compatability with VLOG message format
-DEFAULT_FORMAT                  TLOG.LTEXT%TYPE := '%(seps)%(date):%(hsecs)%(sepe)%(seps)%(level)%(sepe)%(seps)%(user)%(sepe)%(seps)%(section)%(sepe)%(seps)%(text)%(sepe)'; 
+DEFAULT_FORMAT                  TLOG.LTEXT%TYPE := '%(seps)%(date):%(hsecs)%(sepe)%(seps)%(level)%(sepe)%(seps)%(user)%(sepe)%(seps)%(sid)%(sepe)%(seps)%(section)%(sepe)%(seps)%(text)%(sepe)'; 
 
 DEFAULT_DATE_FORMAT             TLOG.LTEXT%TYPE := 'Mon DD, HH24:MI:SS';
 

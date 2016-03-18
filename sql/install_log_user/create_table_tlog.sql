@@ -30,10 +30,13 @@ CREATE TABLE TLOG
   LTEXT         VARCHAR2(4000 BYTE), 
   LUSER         VARCHAR2(30 BYTE), 
   LINSTANCE     NUMBER(38) DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
+  LSID          NUMBER, 
   LXML          SYS.XMLTYPE DEFAULT NULL,
   CONSTRAINT   PK_STG PRIMARY KEY (ID));
 
 COMMENT ON COLUMN TLOG.LINSTANCE IS 'The instance identification number of the current instance';
+
+COMMENT ON COLUMN TLOG.LSID IS 'Oracle session identifier';
 
 COMMENT ON COLUMN TLOG.LXML IS 'XML data. Primarily for logging webservice calls.';
 

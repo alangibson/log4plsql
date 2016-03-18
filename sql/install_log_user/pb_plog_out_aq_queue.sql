@@ -23,7 +23,7 @@ create or replace PACKAGE BODY PLOG_OUT_AQ AS
   
   PROCEDURE log
 (
-    pCTX        IN       PLOGPARAM.LOG_CTX                ,  
+    pCTX        IN       PLOGPARAM.LOG_CTX                 ,  
     pID         IN       TLOG.id%TYPE                      ,
     pLDate      IN       TLOG.ldate%TYPE                   ,
     pLHSECS     IN       TLOG.lhsecs%TYPE                  ,
@@ -32,7 +32,8 @@ create or replace PACKAGE BODY PLOG_OUT_AQ AS
     pLUSER      IN       TLOG.luser%TYPE                   ,
     pLTEXT      IN       TLOG.LTEXT%TYPE                   ,
     pLINSTANCE  IN       TLOG.LINSTANCE%TYPE DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
-    pLXML        IN       SYS.XMLTYPE DEFAULT NULL
+    pLSID       IN       TLOG.LSID%TYPE                    ,
+    pLXML       IN       SYS.XMLTYPE DEFAULT NULL
 ) AS
 --******************************************************************************
 --   NAME:   log
@@ -61,7 +62,7 @@ create or replace PACKAGE BODY PLOG_OUT_AQ AS
   BEGIN
     IF pCtx.USE_LOG4J THEN
       -- create the log object
-      l_log_msg := T_LOG_QUEUE(pID, pLDate, pLHSECS, pLLEVEL, pLSECTION, pLUSER, pLTEXT, pLINSTANCE);
+      l_log_msg := T_LOG_QUEUE(pID, pLDate, pLHSECS, pLLEVEL, pLSECTION, pLUSER, pLTEXT, pLINSTANCE, pLSID);
       
       IF pCTX.USE_OUT_TRANS = FALSE THEN
         -- log object is enqueued in the calling application transaction
@@ -142,7 +143,8 @@ PROCEDURE dequeue_one_msg
     pLSECTION   OUT       TLOG.lsection%TYPE                ,
     pLUSER      OUT       TLOG.luser%TYPE                   ,
     pLTEXT      OUT       TLOG.LTEXT%TYPE                   ,
-    pLINSTANCE  OUT       TLOG.LINSTANCE%TYPE
+    pLINSTANCE  OUT       TLOG.LINSTANCE%TYPE               ,
+    pLSID       OUT       TLOG.LSID%TYPE
 ) AS
 --******************************************************************************
 --   NAME:   dequeue_one_msg
@@ -181,6 +183,7 @@ BEGIN
       pLUSER := l_log_msg.lUser;
       pLTEXT := l_log_msg.lText;
       pLINSTANCE := l_log_msg.lInstance;
+      pLSID := l_log_msg.lSID;
       
 END dequeue_one_msg;
 
@@ -358,6 +361,7 @@ BEGIN
   DBMS_OUTPUT.put_line ('User        : ' || p_log_msg.lUser);
   DBMS_OUTPUT.put_line ('Text        : ' || p_log_msg.lText);
   DBMS_OUTPUT.put_line ('Instance    : ' || p_log_msg.lInstance);
+  DBMS_OUTPUT.put_line ('Session ID  : ' || p_log_msg.lSID);
 END;
 
 

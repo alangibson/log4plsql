@@ -22,7 +22,8 @@ PACKAGE BODY PLOG_OUT_TRACE AS
     pLUSER      IN       TLOG.luser%TYPE                   ,
     pLTEXT      IN       TLOG.LTEXT%TYPE                   ,
     pLINSTANCE  IN       TLOG.LINSTANCE%TYPE DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
-    pLXML        IN       SYS.XMLTYPE DEFAULT NULL
+    pLSID       IN       TLOG.LSID%TYPE                    ,
+    pLXML       IN       SYS.XMLTYPE DEFAULT NULL
 ) 
 --*******************************************************************************
 --   NAME:   log
@@ -50,7 +51,7 @@ BEGIN
     IF pCTX.USE_TRACE = TRUE THEN        
         sys.dbms_system.ksdwrt(1,'PLOG:'||TO_CHAR(pLDATE, 'YYYY-MM-DD HH24:MI:SS')||':'||
         LTRIM(TO_CHAR(MOD(pLHSECS,100),'09'))||
-        ' user: '||PLUSER||' level: '||PLOGPARAM.getLevelInText(pLLEVEL)||
+        ' user: '||PLUSER||' sid: '||pLSID||' level: '||PLOGPARAM.getLevelInText(pLLEVEL)||
         ' logid: '||pID ||' '||pLSECTION||' '||pLINSTANCE); 
         
         sys.dbms_system.ksdwrt(1,substr(pLTEXT,0,1000));

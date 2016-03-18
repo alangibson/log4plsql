@@ -28,5 +28,6 @@ lLevel     NUMBER,
 lSection   VARCHAR(2000),
 lUser      VARCHAR(30),
 lText      VARCHAR(2000),
-lInstance  NUMBER);
+lInstance  NUMBER,
+lSID       NUMBER);
 /

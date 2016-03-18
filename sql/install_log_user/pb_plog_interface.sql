@@ -67,7 +67,8 @@ PACKAGE BODY PLOG_INTERFACE AS
     pLUSER      IN        TLOG.luser%TYPE                   ,
     pLTEXT      IN        TLOG.LTEXT%TYPE                   ,
     pLINSTANCE  IN        TLOG.LINSTANCE%TYPE DEFAULT SYS_CONTEXT(''USERENV'', ''INSTANCE''),
-    pLXML        IN        SYS.XMLTYPE DEFAULT NULL     
+    pLSID       IN        TLOG.LSID%TYPE                    ,
+    pLXML       IN        SYS.XMLTYPE DEFAULT NULL     
 ) AS
 --*******************************************************************************
 --   NAME:   log
@@ -83,6 +84,7 @@ PACKAGE BODY PLOG_INTERFACE AS
 --      pLUSER             database user (SYSUSER)
 --      pLTEXT             log text
 --      pLINSTANCE         database instance id
+--      pLSID              database session id
 -- 
 --   Public. Function created dynamically during the installation. 
 --   Calls the log functions of the packages that have been installed.
@@ -102,7 +104,7 @@ LOOP
   EXIT WHEN curs_package_log%NOTFOUND;
   l_dynamic_sql_1 := l_dynamic_sql_1 || 
                   l_package_name || 
-                  '.log(pCTX, pID, pLDate, pLHSECS, pLLEVEL, pLSECTION, pLUSER, pLTEXT, pLINSTANCE, pLXML);' || 
+                  '.log(pCTX, pID, pLDate, pLHSECS, pLLEVEL, pLSECTION, pLUSER, pLTEXT, pLINSTANCE, pLSID, pLXML);' || 
                   l_separator;
 END LOOP;
 
