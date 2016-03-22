@@ -34,9 +34,23 @@ CREATE TABLE TLOG
   LXML          SYS.XMLTYPE DEFAULT NULL,
   CONSTRAINT   PK_STG PRIMARY KEY (ID));
 
+COMMENT ON TABLE TLOG IS 'Table to keep logging messages in database';
+
+COMMENT ON COLUMN TLOG.ID IS 'Record identifier';
+
+COMMENT ON COLUMN TLOG.LDATE IS 'Date of the log message (SYSTIMESTAMP)';
+
+COMMENT ON COLUMN TLOG.LHSECS IS 'Number of seconds since the beginning of the epoch';
+
+COMMENT ON COLUMN TLOG.LLEVEL IS 'Log level as numeric value';
+
+COMMENT ON COLUMN TLOG.LSECTION IS 'Formated call stack';
+
+COMMENT ON COLUMN TLOG.LUSER IS 'Database user (SYSUSER)';
+
 COMMENT ON COLUMN TLOG.LINSTANCE IS 'The instance identification number of the current instance';
 
 COMMENT ON COLUMN TLOG.LSID IS 'Oracle session identifier';
 
-COMMENT ON COLUMN TLOG.LXML IS 'XML data. Primarily for logging webservice calls.';
+COMMENT ON COLUMN TLOG.LXML IS 'XML data. Primarily for logging webservice calls';
 
