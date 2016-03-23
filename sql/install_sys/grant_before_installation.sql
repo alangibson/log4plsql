@@ -23,6 +23,8 @@
 set verify off
 ACCEPT V_USER CHAR PROMPT 'Enter the user name:'
 
+GRANT CREATE VIEW to &V_USER;
+
 -- grant needed to get SID of current session
 GRANT SELECT ON SYS.V_$MYSTAT to &V_USER;
 
