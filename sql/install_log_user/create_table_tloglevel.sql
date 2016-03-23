@@ -20,7 +20,7 @@
  * distribution in the LICENSE.txt file.  
  * see: <http://log4plsql.sourceforge.net>  */
 
--- Create table if it not exist
+-- Create table if it not exists
 declare
   l$cnt integer := 0;
 

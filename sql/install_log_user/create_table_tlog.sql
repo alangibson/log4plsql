@@ -20,7 +20,7 @@
 
 -- drop table tlog;
 
--- Create table if it not exist
+-- Create table if it not exists
 declare
   l$cnt integer := 0;
 

@@ -18,7 +18,7 @@
  * distribution in the LICENSE.txt file.  
  * see: <http://log4plsql.sourceforge.net>  */
 
--- Create sequence if it not exist
+-- Create sequence if it not exists
 declare
   l$cnt integer := 0;
   l$sql varchar2(1024) := '
