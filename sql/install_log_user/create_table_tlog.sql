@@ -20,6 +20,11 @@
 
 -- drop table tlog;
 
+-- Create table if it not exists
+declare
+  l$cnt integer := 0;
+
+  l$sql varchar2(1024) := '
 CREATE TABLE TLOG
 (
   ID            NUMBER, 
@@ -29,11 +34,57 @@ CREATE TABLE TLOG
   LSECTION      VARCHAR2(2000 BYTE), 
   LTEXT         VARCHAR2(4000 BYTE), 
   LUSER         VARCHAR2(30 BYTE), 
-  LINSTANCE     NUMBER(38) DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
+  LINSTANCE     NUMBER(38) DEFAULT SYS_CONTEXT(''USERENV'', ''INSTANCE''),
+  LSID          NUMBER, 
   LXML          SYS.XMLTYPE DEFAULT NULL,
-  CONSTRAINT   PK_STG PRIMARY KEY (ID));
+  CONSTRAINT   PK_STG PRIMARY KEY (ID))
+';
+begin
+  select count(1) into l$cnt
+    from user_tables
+   where table_name = 'TLOG';
+   
+   if l$cnt = 0 then
+     begin
+       execute immediate l$sql;
+       dbms_output.put_line( ' Table TLOG created' );
+     end;
+   else
+       dbms_output.put_line( ' Table TLOG already exists' );
+
+       -- Check for new column LSID
+       select count(1) into l$cnt
+         from user_tab_columns
+        where table_name =  'TLOG'
+          and column_name = 'LSID';
+
+       if l$cnt = 0 then
+            execute immediate 'alter table TLOG add (LSID NUMBER)';
+            dbms_output.put_line( ' Table TLOG modified: added LSID column' );
+        end if;
+
+   end if;
+end;
+/
+
+
+COMMENT ON TABLE TLOG IS 'Table to keep logging messages in database';
+
+COMMENT ON COLUMN TLOG.ID IS 'Record identifier';
+
+COMMENT ON COLUMN TLOG.LDATE IS 'Date of the log message (SYSTIMESTAMP)';
+
+COMMENT ON COLUMN TLOG.LHSECS IS 'Number of seconds since the beginning of the epoch';
+
+COMMENT ON COLUMN TLOG.LLEVEL IS 'Log level as numeric value';
+
+COMMENT ON COLUMN TLOG.LSECTION IS 'Formated call stack';
+
+COMMENT ON COLUMN TLOG.LUSER IS 'Database user (SYSUSER)';
 
 COMMENT ON COLUMN TLOG.LINSTANCE IS 'The instance identification number of the current instance';
 
-COMMENT ON COLUMN TLOG.LXML IS 'XML data. Primarily for logging webservice calls.';
+COMMENT ON COLUMN TLOG.LSID IS 'Oracle session identifier';
+
+COMMENT ON COLUMN TLOG.LXML IS 'XML data. Primarily for logging webservice calls';
 

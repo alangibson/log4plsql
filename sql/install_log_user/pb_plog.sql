@@ -258,6 +258,7 @@ function formatMessage
     pLUSER      IN       TLOG.luser%TYPE                                        ,
     pLTEXT      IN       TLOG.LTEXT%TYPE                                        ,
     pLINSTANCE  IN       TLOG.LINSTANCE%TYPE DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
+    pLSID       IN       TLOG.LSID%TYPE                                         ,
     pLXML       IN       SYS.XMLTYPE DEFAULT NULL
 )
 return VARCHAR2
@@ -274,6 +275,7 @@ begin
     buffer := replace(buffer, '%(user)', pLUSER );
     buffer := replace(buffer, '%(text)', pLTEXT );
     buffer := replace(buffer, '%(instance)', pLINSTANCE );
+    buffer := replace(buffer, '%(sid)', pLSID );
     buffer := replace(buffer, '%(seps)', pSEPSTART);
     buffer := replace(buffer, '%(sepe)', pSEPEND);
     return buffer;
@@ -330,6 +332,13 @@ BEGIN
     pCTX.USE_DBMS_OUTPUT := pDBMS_OUTPUT;
     pCTX.USE_SESSION     := pSESSION;
     pCTX.DBMS_OUTPUT_WRAP := pDBMS_OUTPUT_WRAP;
+
+    begin
+        select distinct sid into pCTX.LSID from sys.v_$mystat;
+    exception
+        when OTHERS
+                then NULL;
+    end;
 
     RETURN pCTX;
 
@@ -1459,7 +1468,7 @@ BEGIN
     END IF;
 
     -- use the interface package to dispatch the log message in several outputs
-    PLOG_INTERFACE.log(pCTX, pID, pLDate, pLHSECS, pLLEVEL, pLSECTION, pLUSER, LLTEXT, pLINSTANCE, pLXML);
+    PLOG_INTERFACE.log(pCTX, pID, pLDate, pLHSECS, pLLEVEL, pLSECTION, pLUSER, LLTEXT, pLINSTANCE, pCTX.LSID, pLXML);
 
 END log;
 
@@ -1488,7 +1497,7 @@ PROCEDURE log
     pLLEVEL     IN       TLOG.llevel%TYPE                  ,
     pLSECTION   IN       TLOG.lsection%TYPE                ,
     pLUSER      IN       TLOG.luser%TYPE                   ,
-    pLOGMESSAGE    IN       LOGMESSAGE                        ,
+    pLOGMESSAGE IN       LOGMESSAGE                        ,
     pLINSTANCE  IN       TLOG.LINSTANCE%TYPE               ,
     pLXML       IN       SYS.XMLTYPE            DEFAULT NULL
 )

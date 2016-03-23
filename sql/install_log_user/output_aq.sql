@@ -18,6 +18,7 @@
 --
 -------------------------------------------------------------------
 
+@@drop_queue
 
 PROMPT Create type T_LOG_QUEUE ...
 
@@ -44,7 +45,6 @@ PROMPT Start the queue ...
 exec dbms_aqadm.start_queue('log_queue');
 
 --exec dbms_aqadm.start_queue('log_queue_topic');
-
 
 --PROMPT Add subscriber 'LOG4J' for the topic
 

@@ -20,7 +20,11 @@
  * distribution in the LICENSE.txt file.  
  * see: <http://log4plsql.sourceforge.net>  */
 
+-- Create table if it not exists
+declare
+  l$cnt integer := 0;
 
+  l$sql varchar2(1024) := '
 CREATE TABLE TLOGLEVEL
 (
  LLEVEL       number (4,0),
@@ -29,5 +33,22 @@ CREATE TABLE TLOGLEVEL
  LCODE       varchar2(10),
  LDESC        varchar2(255),
  CONSTRAINT pk_TLOGLEVEL PRIMARY KEY (LLEVEL)
-);
+)
+';
+begin
+  select count(1) into l$cnt
+    from user_tables
+   where table_name = 'TLOGLEVEL';
+   
+   if l$cnt = 0 then
+     begin
+       execute immediate l$sql;
+       dbms_output.put_line( ' Table TLOGLEVEL created' );
+     end;
+   else
+       dbms_output.put_line( ' Table TLOGLEVEL already exists' );
+   end if;
+end;
+/
+
 

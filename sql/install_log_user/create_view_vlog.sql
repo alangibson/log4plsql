@@ -28,7 +28,8 @@ select
                         pLSECTION   => LSECTION,
                         pLUSER      => LUSER,
                         pLTEXT      => LTEXT,
-                        pLINSTANCE  => LINSTANCE 
+                        pLINSTANCE  => LINSTANCE,
+                        pLSID       => LSID
                         ) log
 from tlog 
 order by ID

@@ -21,7 +21,8 @@ PROCEDURE addRow
     pLUSER      IN TLOG.luser%TYPE                  ,
     pLTEXT      IN TLOG.LTEXT%TYPE                  ,
     pLINSTANCE  IN TLOG.LINSTANCE%TYPE DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
-    pLXML       IN       SYS.XMLTYPE DEFAULT NULL
+    pLSID       IN TLOG.LSID%TYPE                   ,
+    pLXML       IN SYS.XMLTYPE DEFAULT NULL
 )
 --*******************************************************************************
 --   NAME:   addRow
@@ -53,6 +54,7 @@ BEGIN
              LUSER      ,
              LTEXT      ,
              LINSTANCE  ,
+             LSID       ,
              LXML
              ) VALUES (
              pID,
@@ -63,6 +65,7 @@ BEGIN
              pLUSER,
              pLTEXT,
              pLINSTANCE,
+             pLSID,
              pLXML);
 END addRow;
 
@@ -78,7 +81,8 @@ PROCEDURE addRowAutonomous
     pLUSER      IN TLOG.luser%TYPE                  ,
     pLTEXT      IN TLOG.LTEXT%TYPE                  ,
     pLINSTANCE  IN TLOG.LINSTANCE%TYPE DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
-    pLXML        IN SYS.XMLTYPE DEFAULT NULL
+    pLSID       IN TLOG.LSID%TYPE                   ,
+    pLXML       IN SYS.XMLTYPE DEFAULT NULL
 )
 --*******************************************************************************
 --   NAME:   addRowAutonomous
@@ -113,7 +117,8 @@ BEGIN
    pLUSER      => pLUSER,
    pLTEXT      => pLTEXT,
    pLINSTANCE  => pLINSTANCE,
-   pLXML        => pLXML
+   pLSID       => pLSID,
+   pLXML       => pLXML
   );
   
   COMMIT;
@@ -125,7 +130,7 @@ END addRowAutonomous;
 
 PROCEDURE log
 (
-    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX                ,  
+    pCTX        IN OUT NOCOPY PLOGPARAM.LOG_CTX            ,  
     pID         IN       TLOG.id%TYPE                      ,
     pLDate      IN       TLOG.ldate%TYPE                   ,
     pLHSECS     IN       TLOG.lhsecs%TYPE                  ,
@@ -134,7 +139,8 @@ PROCEDURE log
     pLUSER      IN       TLOG.luser%TYPE                   ,
     pLTEXT      IN       TLOG.LTEXT%TYPE                   ,
     pLINSTANCE  IN       TLOG.LINSTANCE%TYPE DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
-    pLXML        IN       SYS.XMLTYPE DEFAULT NULL
+    pLSID       IN       TLOG.LSID%TYPE                    ,
+    pLXML       IN       SYS.XMLTYPE DEFAULT NULL
 ) 
 --*******************************************************************************
 --   NAME:   log
@@ -170,7 +176,8 @@ BEGIN
              pLUSER      => pLUSER,
              pLTEXT      => pLTEXT,
              pLINSTANCE  => pLINSTANCE,
-             pLXML        => pLXML);
+             pLSID       => pLSID,
+             pLXML       => pLXML);
     ELSE
       -- insert the row using an autonomous transaction
       addRowAutonomous(pID         => pID,
@@ -181,7 +188,8 @@ BEGIN
                        pLUSER      => pLUSER,
                        pLTEXT      => pLTEXT,
                        pLINSTANCE  => pLINSTANCE,
-                       pLXML        => pLXML);
+                       pLSID       => pLSID,
+                       pLXML       => pLXML);
     END IF;
   END IF;
 END log;

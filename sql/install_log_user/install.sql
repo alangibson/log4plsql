@@ -19,6 +19,7 @@
  * see: <http://log4plsql.sourceforge.net>  */
 
 
+set serveroutput on
 spool install.txt
 
 PROMPT LOG4PLSQL Installation
@@ -32,9 +33,13 @@ PROMPT Create table TLOGLEVEL ...
 
 @@create_table_tloglevel
 
+whenever sqlerror continue;
+
 PROMPT Insert rows into TLOGLEVEL ...
 
 @@insert_into_tloglevel
+
+whenever sqlerror exit sql.sqlcode;
 
 PROMPT Create table TLOG ...
 

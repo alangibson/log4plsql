@@ -19,6 +19,5 @@
  * see: <http://log4plsql.sourceforge.net>  */
 
 
-
 create or replace TYPE T_ARRAY_LOG_QUEUE AS TABLE OF T_LOG_QUEUE;
 /
