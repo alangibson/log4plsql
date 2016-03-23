@@ -20,6 +20,11 @@
 
 -- drop table tlog;
 
+-- Create table if it not exist
+declare
+  l$cnt integer := 0;
+
+  l$sql varchar2(1024) := '
 CREATE TABLE TLOG
 (
   ID            NUMBER, 
@@ -29,10 +34,39 @@ CREATE TABLE TLOG
   LSECTION      VARCHAR2(2000 BYTE), 
   LTEXT         VARCHAR2(4000 BYTE), 
   LUSER         VARCHAR2(30 BYTE), 
-  LINSTANCE     NUMBER(38) DEFAULT SYS_CONTEXT('USERENV', 'INSTANCE'),
+  LINSTANCE     NUMBER(38) DEFAULT SYS_CONTEXT(''USERENV'', ''INSTANCE''),
   LSID          NUMBER, 
   LXML          SYS.XMLTYPE DEFAULT NULL,
-  CONSTRAINT   PK_STG PRIMARY KEY (ID));
+  CONSTRAINT   PK_STG PRIMARY KEY (ID))
+';
+begin
+  select count(1) into l$cnt
+    from user_tables
+   where table_name = 'TLOG';
+   
+   if l$cnt = 0 then
+     begin
+       execute immediate l$sql;
+       dbms_output.put_line( ' Table TLOG created' );
+     end;
+   else
+       dbms_output.put_line( ' Table TLOG already exists' );
+
+       -- Check for new column LSID
+       select count(1) into l$cnt
+         from user_tab_columns
+        where table_name =  'TLOG'
+          and column_name = 'LSID';
+
+       if l$cnt = 0 then
+            execute immediate 'alter table TLOG add (LSID NUMBER)';
+            dbms_output.put_line( ' Table TLOG modified: added LSID column' );
+        end if;
+
+   end if;
+end;
+/
+
 
 COMMENT ON TABLE TLOG IS 'Table to keep logging messages in database';
 
