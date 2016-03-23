@@ -19,7 +19,6 @@
  * see: <http://log4plsql.sourceforge.net>  */
 
 
-
 create or replace TYPE T_LOG_QUEUE AS OBJECT(
 lID        NUMBER, 
 lDate      TIMESTAMP,

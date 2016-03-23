@@ -6,7 +6,7 @@ exec dbms_aqadm.drop_queue('log_queue');
 
 
 -- drop the queue table
-exec dbms_aqadm.drop_queue_table('qtab_log');
+exec dbms_aqadm.drop_queue_table('qtab_log', true);
 
 -- drop the type used for the queue
-drop type T_LOG_QUEUE;
+drop type T_LOG_QUEUE FORCE;

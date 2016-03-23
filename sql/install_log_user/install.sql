@@ -19,6 +19,7 @@
  * see: <http://log4plsql.sourceforge.net>  */
 
 
+set serveroutput on
 spool install.txt
 
 PROMPT LOG4PLSQL Installation
